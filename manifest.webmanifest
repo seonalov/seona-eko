@@ -1,0 +1,21 @@
+{
+  "name": "Seona Eko — Revir",
+  "short_name": "Seona Eko",
+  "description": "Revir Seona Eko: odstrjel, karta, skupni lovovi, hladnjača i lovostaj — radi i bez interneta.",
+  "lang": "hr",
+  "start_url": "./#/home",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#3c4540",
+  "theme_color": "#3c4540",
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ],
+  "shortcuts": [
+    { "name": "Novi odstrjel", "short_name": "Odstrjel", "url": "./#/odstrjel/novi", "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192" }] },
+    { "name": "Karta", "url": "./#/karta", "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192" }] }
+  ]
+}

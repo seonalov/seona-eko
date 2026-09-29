@@ -1,0 +1,7 @@
+# Öffentlich (GitHub Pages) wird nur die App selbst. Interne Doku, Tests und Werkzeuge bleiben lokal —
+# darin stehen u. a. Telefonnummern und Namen (WARTUNG.md §2.8).
+README.md
+WARTUNG.md
+tests/
+tools/
+.DS_Store

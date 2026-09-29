@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="hr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#3c4540">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Seona Eko">
+<meta name="description" content="Seona Eko — revir: odstrjel, karta, skupni lovovi, hladnjača i lovostaj, radi i bez interneta.">
+<title>Seona Eko — Revir</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icons/icon-192.png" type="image/png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<link rel="preload" href="fonts/oswald-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="fonts/worksans-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="vendor/leaflet/leaflet.css">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="app">
+  <header class="topbar">
+    <svg class="logo" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <path d="M24 40 V21"/><path d="M24 21c-4 0-7-4-10-12"/><path d="M24 21c-7-2-12-8-16-14"/><path d="M24 21c4 0 7-4 10-12"/><path d="M24 21c7-2 12-8 16-14"/>
+    </svg>
+    <div class="brand"><b>Seona Eko</b><span id="brand-sub">Revir</span></div>
+    <button type="button" class="sync-pill" id="sync-pill"><span class="dot"></span><span id="sync-pill-text"></span></button>
+  </header>
+
+  <main id="view" tabindex="-1"></main>
+
+  <nav class="bottomnav" id="bottomnav" aria-label="Navigacija">
+    <a href="#/home" data-nav="home"><span data-icon="home"></span><span data-i18n="navHome">Početna</span><i class="ind"></i></a>
+    <a href="#/karta" data-nav="karta"><span data-icon="map"></span><span data-i18n="navKarta">Karta</span><i class="ind"></i></a>
+    <a href="#/odstrjel" data-nav="odstrjel"><span data-icon="list"></span><span data-i18n="navOdstrjel">Odstrjel</span><i class="ind"></i></a>
+    <a href="#/lovovi" data-nav="lovovi"><span data-icon="group"></span><span data-i18n="navLovovi">Lovovi</span><i class="ind"></i></a>
+    <a href="#/vise" data-nav="vise"><span data-icon="more"></span><span data-i18n="navVise">Više</span><i class="ind"></i></a>
+  </nav>
+</div>
+
+<!-- Erststart / Code ändern -->
+<div class="overlay" id="setup" role="dialog" aria-modal="true" aria-labelledby="setup-title">
+  <form class="box" id="setup-form" autocomplete="off">
+    <svg class="success-icon" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="color:var(--copper)">
+      <path d="M24 40 V21"/><path d="M24 21c-4 0-7-4-10-12"/><path d="M24 21c-7-2-12-8-16-14"/><path d="M24 21c4 0 7-4 10-12"/><path d="M24 21c7-2 12-8 16-14"/>
+    </svg>
+    <h2 id="setup-title">Seona Eko</h2>
+    <p data-i18n="setupText">Upišite kod koji ste dobili od stručne osobe.</p>
+    <p class="hint" data-i18n="setupQrHint" style="margin-top:-4px">Imate QR kod? Skenirajte ga kamerom mobitela.</p>
+    <div class="field">
+      <span class="field-label" data-i18n="lblLang">Jezik</span>
+      <div class="seg" id="setup-lang">
+        <button type="button" data-lang="hr">HR</button><button type="button" data-lang="en">EN</button><button type="button" data-lang="de">DE</button>
+      </div>
+    </div>
+    <div class="field">
+      <label class="field-label req" for="setup-code" data-i18n="lblCode">Kod</label>
+      <input type="password" id="setup-code" autocapitalize="off" autocorrect="off" spellcheck="false">
+    </div>
+    <div class="field">
+      <label class="field-label" for="setup-device" data-i18n="lblDevice">Vaše ime / uređaj</label>
+      <input type="text" id="setup-device" data-i18n-ph="phDevice">
+    </div>
+    <div class="error-msg" id="setup-error" hidden></div>
+    <div class="notice" id="setup-notice" hidden></div>
+    <div class="field" style="margin-top:18px"><button type="submit" class="btn primary block" id="setup-submit" data-i18n="btnSave">Spremi</button></div>
+    <button type="button" class="btn ghost block" id="setup-cancel" data-i18n="cancel" hidden>Odustani</button>
+  </form>
+</div>
+
+<!-- Nach dem Speichern eines Abschusses -->
+<div class="overlay" id="done" role="dialog" aria-modal="true" aria-labelledby="done-title">
+  <div class="box" style="text-align:center">
+    <span id="done-icon"></span>
+    <h2 id="done-title"></h2>
+    <p id="done-text"></p>
+    <p id="done-warn" class="warn-text" hidden></p>
+    <div class="stack" style="margin-top:18px">
+      <button type="button" class="btn primary block" id="done-again" data-i18n="btnAnother">Još jedan unos</button>
+      <button type="button" class="btn block" id="done-close" data-i18n="btnDone">Gotovo</button>
+    </div>
+  </div>
+</div>
+
+<script src="config.js"></script>
+<script src="vendor/leaflet/leaflet.js"></script>
+<script src="vendor/qrcode/qrcode.min.js"></script>
+<script src="js/core/i18n.js"></script>
+<script src="js/data/icons.js"></script>
+<script src="js/data/lovostaj.js"></script>
+<script src="js/data/plan.js"></script>
+<script src="js/core/db.js"></script>
+<script src="js/core/api.js"></script>
+<script src="js/core/sync.js"></script>
+<script src="js/core/store.js"></script>
+<script src="js/core/ui.js"></script>
+<script src="js/core/geo.js"></script>
+<script src="js/core/wetter.js"></script>
+<script src="js/core/app.js"></script>
+<script src="js/modules/home.js"></script>
+<script src="js/modules/odstrjel.js"></script>
+<script src="js/modules/strecke.js"></script>
+<script src="js/modules/karta.js"></script>
+<script src="js/modules/objekti.js"></script>
+<script src="js/modules/lovovi.js"></script>
+<script src="js/modules/hladnjaca.js"></script>
+<script src="js/modules/lovostaj.js"></script>
+<script src="js/modules/vise.js"></script>
+<script src="js/modules/gost.js"></script>
+<script src="js/modules/gosti.js"></script>
+<script src="js/modules/wetter.js"></script>
+<script src="js/modules/tutorial.js"></script>
+<script>App.start();</script>
+</body>
+</html>
