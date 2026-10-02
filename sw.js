@@ -7,7 +7,7 @@
  * Bei jeder Änderung an App-Dateien CACHE_VERSION hochzählen — sonst sehen installierte Handys
  * die neue Version nicht. Die App zeigt dann „Dostupna je nova verzija — Osvježi".
  */
-var CACHE_VERSION = 'seona-v29';
+var CACHE_VERSION = 'seona-v30';
 var MAP_CACHE = 'seona-karta-v3';
 var SHELL = [
   './', 'index.html', 'styles.css', 'config.js', 'manifest.webmanifest',
@@ -25,7 +25,10 @@ var SHELL = [
 ];
 
 self.addEventListener('install', function (event) {
-  event.waitUntil(caches.open(CACHE_VERSION).then(function (cache) { return cache.addAll(SHELL); }));
+  // cache: 'reload' = am Browser-Zwischenspeicher vorbei (GitHub Pages erlaubt 10 min) — sonst mischt das Update alte Dateien hinein
+  event.waitUntil(caches.open(CACHE_VERSION).then(function (cache) {
+    return cache.addAll(SHELL.map(function (u) { return new Request(u, { cache: 'reload' }); }));
+  }));
 });
 
 self.addEventListener('activate', function (event) {

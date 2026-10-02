@@ -244,7 +244,8 @@ var App = (function () {
     navigator.serviceWorker.addEventListener('controllerchange', function () {
       if (reloading) return; reloading = true; location.reload();
     });
-    navigator.serviceWorker.register('sw.js').then(function (reg) {
+    // updateViaCache 'none': sw.js bei jeder Prüfung frisch vom Server, nicht aus dem 10-min-Zwischenspeicher von GitHub Pages
+    navigator.serviceWorker.register('sw.js', { updateViaCache: 'none' }).then(function (reg) {
       // Neue Version: sofort übernehmen, wenn gerade nichts eingegeben wird — sonst Hinweis mit Knopf.
       // (Einträge liegen in IndexedDB und überstehen das Neuladen ohnehin.)
       function busy() { return !!document.querySelector('.sheet') || (active && active.def.live === false) || /#\/odstrjel\/(novi|uredi)/.test(location.hash) || document.getElementById('setup').classList.contains('show'); }
