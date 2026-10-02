@@ -349,7 +349,20 @@ var App = (function () {
     mapAuto = false;
   }
 
+  /** iPhone, als App installiert: echte Bildschirmhöhe setzen (iOS meldet sie mit durchsichtiger Statusleiste zu kurz,
+   *  die Menüleiste säße sonst zu hoch). Hochformat = größere Seite. */
+  function screenHeight() {
+    if (navigator.standalone !== true) return;
+    var land = window.matchMedia && window.matchMedia('(orientation: landscape)').matches;
+    var h = land ? Math.min(screen.width, screen.height) : Math.max(screen.width, screen.height);
+    document.documentElement.classList.add('ios-standalone');
+    document.documentElement.style.setProperty('--screen-h', h + 'px');
+  }
+
   async function start() {
+    screenHeight();
+    window.addEventListener('resize', screenHeight);
+    window.addEventListener('orientationchange', function () { setTimeout(screenHeight, 300); });
     await handleStartLink();
     I18n.apply(document);
     injectIcons(document.getElementById('bottomnav'));

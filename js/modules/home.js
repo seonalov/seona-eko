@@ -73,10 +73,9 @@
         '<div style="margin-top:12px">' + WetterUI.tile() + '</div>' +
         '<div class="grid-2" style="margin-top:12px">' +
         '<a class="tile" href="#/odstrjel"><div class="t-label">' + ICONS.list + esc(t('tileStrecke')) + '</div>' +
-        // Große Zahl = alles Geschossene (auch Muffel u. a. ohne Plan); darunter der Stand gegen den Plan
-        '<div class="t-value">' + s.list.length + '</div>' +
+        '<div class="t-value">' + s.ist + ' <small>/ ' + s.soll + '</small></div>' +
         '<div class="bar"><span style="width:' + pct(s.ist, s.soll) + '%"></span></div>' +
-        '<div class="t-sub">' + esc(s.pending ? t('pendingN', { n: s.pending }) : t('streckeSub', { ist: s.ist, soll: s.soll })) + '</div></a>' +
+        '<div class="t-sub">' + esc(s.pending ? t('pendingN', { n: s.pending }) : t('tileStreckeSub')) + '</div></a>' +
         '<a class="tile' + (c.old || c.pos ? ' warn' : '') + '" href="#/hladnjaca"><div class="t-label">' + ICONS.cold + esc(t('tileCold')) + '</div>' +
         '<div class="t-value">' + c.n + '</div>' +
         '<div class="t-sub">' + esc(c.pos ? t('aspPositiveShort') : c.old ? t('coldOld', { n: c.old }) : (c.notSent || c.sent) ? t('aspTileLine', { a: c.notSent, b: c.sent }) : t('tileColdSub')) + '</div></a>' +
