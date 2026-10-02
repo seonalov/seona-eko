@@ -59,7 +59,8 @@
         '<div class="section-title"><h2>' + esc(t('about')) + '</h2></div>' +
         '<div class="panel"><p class="legal" style="margin:0 0 10px">' + esc(t('legal')) + '</p>' +
         '<p class="legal" style="margin:0">' + esc(t('aboutData')) + '</p>' +
-        '<p class="legal" style="margin:10px 0 0">Seona Eko — Revir · v' + esc(APP_CONFIG.VERSION) + '</p></div>';
+        '<p class="legal" style="margin:10px 0 0">Seona Eko — Revir · v' + esc(APP_CONFIG.VERSION) + '</p>' +
+        '<button type="button" class="btn small" id="check-update" style="margin-top:10px">' + ICONS.sync + esc(t('updateCheck')) + '</button></div>';
     },
     mount: async function (el, ctx) {
       if (ctx.query.sync) { var s = el.querySelector('#sync'); if (s) s.scrollIntoView(); }
@@ -76,6 +77,7 @@
       });
       UI.$$('#lang-seg button', el).forEach(function (b) { b.onclick = function () { App.setLang(b.getAttribute('data-lang')); }; });
       el.querySelector('#change-code').onclick = function () { App.openSetup(false); };
+      el.querySelector('#check-update').onclick = function () { App.checkUpdate(); };
       var tq = el.querySelector('#team-qr');
       if (tq) tq.onclick = openTeamQr;
       var tr = el.querySelector('#tut-replay');

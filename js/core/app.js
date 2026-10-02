@@ -223,6 +223,21 @@ var App = (function () {
   }
 
   /* ---------------- Service Worker ---------------- */
+  var swReg = null;
+  /** Knopf „Nach Update suchen": neue Version holen und sofort übernehmen; sonst einfach neu laden. */
+  async function checkUpdate() {
+    if (!swReg) { location.reload(); return; }
+    try { await swReg.update(); } catch (e) {}
+    var w = swReg.waiting || swReg.installing;
+    if (w) {
+      if (w.state === 'installed') w.postMessage('skipWaiting');
+      else w.addEventListener('statechange', function () { if (w.state === 'installed') w.postMessage('skipWaiting'); });
+      UI.toast(I18n.t('updateLoading'));
+    } else {
+      UI.toast(I18n.t('updateNone'));
+    }
+  }
+
   function registerSW() {
     if (!('serviceWorker' in navigator)) return;
     var reloading = false;
@@ -238,6 +253,8 @@ var App = (function () {
         UI.toast(I18n.t('updateText'), { kind: 'update', sticky: true, action: I18n.t('btnUpdate'), onAction: function () { worker.postMessage('skipWaiting'); } });
       }
       if (reg.waiting && navigator.serviceWorker.controller) offer(reg.waiting);
+      swReg = reg;
+      reg.update().catch(function () {}); // gleich beim Start nach einer neuen Version fragen
       reg.addEventListener('updatefound', function () {
         var nw = reg.installing;
         if (nw) nw.addEventListener('statechange', function () {
@@ -378,7 +395,7 @@ var App = (function () {
   }
 
   return {
-    start: start, route: route, go: go, render: render, syncNow: syncNow, openSetup: openSetup, setLang: setLang,
+    start: start, route: route, go: go, render: render, syncNow: syncNow, openSetup: openSetup, setLang: setLang, checkUpdate: checkUpdate,
     role: function () { return role; },
     isUprava: function () { return role === 'uprava'; },
     isGost: function () { return role === 'gost'; },
