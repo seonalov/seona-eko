@@ -137,14 +137,14 @@ var Tutorial = (function () {
     document.body.appendChild(el);
     document.body.classList.add('tut-open');
     window.addEventListener('resize', onResize);
-    document.getElementById('view').addEventListener('scroll', onResize, { passive: true });
+    window.addEventListener('scroll', onResize, { passive: true });
     show();
   }
 
   async function close() {
     token++;
     window.removeEventListener('resize', onResize);
-    document.getElementById('view').removeEventListener('scroll', onResize);
+    window.removeEventListener('scroll', onResize);
     document.body.classList.remove('tut-open');
     if (el) { el.remove(); el = null; hole = null; }
     target = null;

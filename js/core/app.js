@@ -40,12 +40,12 @@ var App = (function () {
     var ctx = { params: r.params, query: r.query, name: r.name };
     active = { name: r.name, def: def, ctx: ctx };
     view.className = def.full ? 'full' : '';
-    var y = view.scrollTop;
+    var y = window.scrollY;
     view.innerHTML = def.render ? def.render(ctx) : '';
     injectIcons(view);
     I18n.apply(view);
     if (def.mount) def.mount(view, ctx);
-    view.scrollTop = keepScroll ? y : 0;
+    if (keepScroll) window.scrollTo(0, y); else window.scrollTo(0, 0);
     UI.$$('#bottomnav a').forEach(function (a) {
       if (a.getAttribute('data-nav') === (def.nav || r.name)) a.setAttribute('aria-current', 'page');
       else a.removeAttribute('aria-current');
@@ -351,6 +351,9 @@ var App = (function () {
   }
 
   async function start() {
+    // iPhone/iPad erkennen (für die Seitenlänge, styles.css „html.ios") — andere Geräte bleiben unberührt
+    var ua = navigator.userAgent || '';
+    if (/iPhone|iPad|iPod/i.test(ua) || (/Macintosh/.test(ua) && navigator.maxTouchPoints > 1)) document.documentElement.classList.add('ios');
     await handleStartLink();
     I18n.apply(document);
     injectIcons(document.getElementById('bottomnav'));
