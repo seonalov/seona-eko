@@ -85,14 +85,6 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
 /* ---------------- App-Rahmen ---------------- */
 /* Festes Gerüst: Kopf und Menüzeile stehen, nur der Inhalt (main) scrollt — die Menüzeile springt beim Seitenwechsel nicht. */
 .app{position:fixed;top:0;right:0;bottom:0;left:0;display:flex;flex-direction:column;overflow:hidden;}
-/* Installierte iPhone-App: iOS meldet den Bildschirm mit durchsichtiger Statusleiste zu kurz → echte Höhe aus JS */
-html.ios-standalone .app{bottom:auto;height:var(--screen-h,100%);}
-/* iOS gibt einer installierten App das volle Fenster erst, wenn die Seite länger als der Bildschirm ist
-   (sonst fehlt unten genau die Höhe der Statusleiste). Deshalb hier unsichtbar etwas länger — die App bleibt fest. */
-html.ios-standalone,html.ios-standalone body{height:auto;min-height:calc(100% + env(safe-area-inset-top,0px) + 1px);}
-/* … und alles, was unten am Bildschirm hängt, an die echte Unterkante (ohne den Fehler ergibt das 0) */
-html.ios-standalone .sheet,html.ios-standalone .sheet-scrim,html.ios-standalone .overlay,html.ios-standalone .picker,html.ios-standalone .tut-scrim{bottom:calc(100% - var(--screen-h));}
-html.ios-standalone .toast,html.ios-standalone .tut-card.bottom{bottom:calc(var(--nav-h) + env(safe-area-inset-bottom,0px) + 14px + 100% - var(--screen-h));}
 .topbar{
   background:var(--forest-1);color:var(--accent-ink);
   padding:calc(env(safe-area-inset-top,0px) + 12px) 16px 12px;
