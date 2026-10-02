@@ -60,9 +60,7 @@
         '<div class="panel"><p class="legal" style="margin:0 0 10px">' + esc(t('legal')) + '</p>' +
         '<p class="legal" style="margin:0">' + esc(t('aboutData')) + '</p>' +
         '<p class="legal" style="margin:10px 0 0">Seona Eko — Revir · v' + esc(APP_CONFIG.VERSION) +
-        // vorübergehend: Messwerte zur Menüleiste (Fensterhöhe / Bildschirmhöhe / Korrektur aktiv)
-        (window.screen && window.innerHeight ? ' · ' + window.innerHeight + '/' + window.screen.height : '') + (document.documentElement.classList && document.documentElement.classList.contains('ios-standalone') ? ' · ios' : '') +
-        (navigator.standalone === true ? ' · sa' : '') + '</p>' +
+        '</p>' +
         '<button type="button" class="btn small" id="check-update" style="margin-top:10px">' + ICONS.sync + esc(t('updateCheck')) + '</button></div>';
     },
     mount: async function (el, ctx) {
