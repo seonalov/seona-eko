@@ -4,7 +4,7 @@
  * Einrichtungen werden über ein Fadenkreuz in der Kartenmitte eingetragen (einhändig bedienbar).
  */
 var MapOffline = (function () {
-  var CACHE = 'seona-karta-v2';
+  var CACHE = 'seona-karta-v3';
   // Team: tiles/ (QField-Karte mit Reviergrenzen) · Gäste: tiles_gast/ (dieselbe Karte ohne Grenzen)
   function prefix() { return App.isGost() ? 'tiles_gast' : 'tiles'; }
   // Flag hängt an der Kartenversion: neue Karte (neuer Cache) → wird automatisch neu gespeichert

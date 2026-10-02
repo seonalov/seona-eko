@@ -515,7 +515,7 @@ body.picker-open{overflow:hidden;}
 /* Symbol über dem Text: beide Knöpfe bleiben in HR/EN/DE gleich hoch und mittig */
 .loc-block .loc-buttons .btn{min-height:64px;flex-direction:column;gap:4px;padding:8px 6px;text-align:center;line-height:1.2;}
 .loc-result{display:flex;gap:12px;align-items:flex-start;margin-top:10px;}
-.loc-mini{width:96px;height:96px;border-radius:var(--radius-sm);overflow:hidden;flex:none;border:1px solid var(--line);position:relative;background:#efe9d8;}
+.loc-mini{width:96px;height:96px;background-size:256px 256px !important;border-radius:var(--radius-sm);overflow:hidden;flex:none;border:1px solid var(--line);position:relative;background:#efe9d8;}
 .loc-mini .pin{position:absolute;left:50%;top:50%;width:14px;height:14px;margin:-7px 0 0 -7px;border-radius:50%;background:#471b28;border:2px solid #fff;box-shadow:0 1px 3px rgba(0,0,0,.4);}
 .loc-text{flex:1;min-width:0;font-size:.85rem;}
 .loc-text b{display:block;font-size:.95rem;}
