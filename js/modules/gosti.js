@@ -27,7 +27,7 @@ var Gosti = (function () {
   }
 
   App.route('gosti', {
-    nav: 'vise',
+    nav: 'lovovi',
     render: function (ctx) {
       var id = ctx.params[0] ? decodeURIComponent(ctx.params[0]) : '';
       if (id) return renderDetail(byId(id));
@@ -41,7 +41,7 @@ var Gosti = (function () {
           '<span class="r-main"><span class="r-title">' + esc(g.ime) + '</span><span class="r-sub">' + esc(stay(g) + (next ? ' · ' + t('gNextAnsitz') + ': ' + UI.fmtDay(String(next.datum).slice(0, 10)) : '')) + '</span></span>' +
           (g._pending ? '<span class="badge muted">' + esc(t('stPending')) + '</span>' : '') + ICONS.chevron.replace('<svg', '<svg class="chev"') + '</a></li>';
       }
-      return '<div class="page-head"><div class="eyebrow">' + esc(t('navVise')) + '</div><h1>' + esc(t('guestsTitle')) + '</h1><p>' + esc(t('guestsSub')) + '</p></div>' +
+      return JagdTabs('gosti') + '<div class="page-head"><h1>' + esc(t('guestsTitle')) + '</h1><p>' + esc(t('guestsSub')) + '</p></div>' +
         '<button type="button" class="btn primary block" id="new-gost" style="margin-bottom:14px">' + ICONS.plus + esc(t('newGuest')) + '</button>' +
         (!Store.gostCode() ? '<div class="panel alert-panel soft"><b>' + esc(t('noGuestCode')) + '</b><p class="hint">' + esc(t('noGuestCodeText')) + '</p></div>' : '') +
         (aktuell.length ? '<div class="section-title"><h2>' + esc(t('guestsCurrent')) + '</h2></div><div class="panel flush"><ul class="list">' + aktuell.map(row).join('') + '</ul></div>'
@@ -50,7 +50,8 @@ var Gosti = (function () {
         // Gästecode wechseln: ein Knopf, eine Rückfrage — der Server erzeugt den Code
         '<div class="section-title"><h2>' + esc(t('guestCodeTitle')) + '</h2></div><div class="panel">' +
         (Store.gostCode() ? '<p style="margin:0 0 10px">' + esc(t('guestCodeNow', { c: '' })) + '<b class="code-inline">' + esc(Store.gostCode()) + '</b></p>' : '') +
-        '<button type="button" class="btn block" id="new-code">' + ICONS.sync + esc(t('newGuestCode')) + '</button></div>';
+        '<button type="button" class="btn block" id="new-code">' + ICONS.sync + esc(t('newGuestCode')) + '</button>' +
+        '<a class="btn ghost block" href="#/gost" style="margin-top:8px">' + ICONS.group + esc(t('guestView')) + '</a></div>';
     },
     mount: function (el, ctx) {
       var id = ctx.params[0] ? decodeURIComponent(ctx.params[0]) : '';

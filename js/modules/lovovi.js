@@ -21,6 +21,12 @@
       '<span class="r-end">' + (n ? '<b>' + n + '</b>' + esc(t('pieces')) : (l._pending ? '<span class="badge muted">' + esc(t('stPending')) + '</span>' : '')) + '</span></a></li>';
   }
 
+  /** Menübereich „Jagden": Drückjagden · Gäste */
+  function tabs(active) {
+    return App.isUprava() ? UI.sectionTabs([['#/lovovi', t('lovoviTitle'), active === 'lov'], ['#/gosti', t('tabGuests'), active === 'gosti']]) : '';
+  }
+  window.JagdTabs = tabs;
+
   App.route('lovovi', {
     nav: 'lovovi',
     render: function () {
@@ -29,7 +35,7 @@
       var up = all.filter(function (l) { return String(l.datum).slice(0, 10) >= today; });
       var past = all.filter(function (l) { return String(l.datum).slice(0, 10) < today; }).reverse();
       var next = up[0];
-      return '<div class="page-head"><div class="eyebrow">' + esc(t('huntYear')) + ' ' + esc(Store.jagdjahr().label) + '</div>' +
+      return tabs('lov') + '<div class="page-head"><div class="eyebrow">' + esc(t('huntYear')) + ' ' + esc(Store.jagdjahr().label) + '</div>' +
         '<h1>' + esc(t('lovoviTitle')) + '</h1>' +
         '<p>' + esc(next ? t('lovoviNext', { d: UI.fmtDay(String(next.datum).slice(0, 10)), l: Strecke.shortLov(next.lokacija) }) : t('noNextLov')) + '</p></div>' +
         (App.isUprava() ? '<button type="button" class="btn primary block" id="new-lov" style="margin-bottom:14px">' + ICONS.plus + esc(t('newLov')) + '</button>' : '') +
@@ -64,7 +70,7 @@
       return '<div class="page-head"><div class="eyebrow"><a href="#/lovovi" style="color:inherit">' + esc(t('lovoviTitle')) + '</a> · ' + esc(Strecke.shortLov(l.lokacija)) + '</div>' +
         '<h1>' + esc(l.naziv || t('lovDefaultName')) + '</h1>' +
         '<p>' + esc(UI.fmtDate(String(l.datum).slice(0, 10), { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })) + (l.vodja ? ' · ' + esc(t('lblVodja')) + ': ' + esc(l.vodja) : '') + '</p></div>' +
-        (isPast || s.length ? '<a class="btn primary block" href="#/odstrjel/novi?lov=' + encodeURIComponent(l.id) + '" style="margin-bottom:12px">' + ICONS.plus + esc(t('addToLov')) + '</a>' : '') +
+        (isPast || s.length ? '<button type="button" class="btn primary block" id="lov-add" style="margin-bottom:12px">' + ICONS.plus + esc(t('addToLov')) + '</button>' : '') +
         '<div class="grid-2"><div class="tile"><div class="t-label">' + ICONS.list + esc(t('tileStrecke')) + '</div><div class="t-value">' + s.length + '</div><div class="t-sub num">' + Math.round(kg) + ' kg</div></div>' +
         '<div class="tile"><div class="t-label">' + ICONS.pin + esc(t('stands')) + '</div><div class="t-value">' + stands.length + '</div><div class="t-sub">' + esc(sudionici.length ? t('participantsN', { n: sudionici.length }) : '—') + '</div></div></div>' +
         (s.length ? '<div class="section-title"><h2>' + esc(t('lovStrecke')) + '</h2></div><div class="panel stack">' +
@@ -90,6 +96,8 @@
       if (!l) return;
       UI.$$('.row[data-id]', el).forEach(function (b) { b.onclick = function () { Strecke.openDetail(b.getAttribute('data-id')); }; });
       UI.$$('.row[data-obj]', el).forEach(function (b) { b.onclick = function () { Objekti.openDetail(b.getAttribute('data-obj')); }; });
+      var add = el.querySelector('#lov-add'); if (add) add.onclick = function () { openQuick(l); };
+      if (ctx.query.add) openQuick(l);
       var e = el.querySelector('#edit-lov'); if (e) e.onclick = function () { openForm(l); };
       var d = el.querySelector('#del-lov'); if (d) d.onclick = async function () {
         if (await UI.confirm(t('delete'), t('confirmDeleteLov'), t('delete'), true)) {
@@ -100,6 +108,101 @@
       };
     }
   });
+
+  /**
+   * Strecke der Drückjagd direkt hier erfassen: Stück für Stück in einem Feld, das offen bleibt.
+   * Ort = Stand (kein GPS nötig), Datum/Revier/Jagdart kommen von der Jagd. Gespeichert wie jeder Abschuss.
+   */
+  var QUICK_SPECIES = ['Divlja svinja', 'Jelen obični', 'Jelen lopatar', 'Srna'];
+  var QUICK_KLASE = ['Tele/prase', 'Mlađa klasa', 'Zrela klasa'];
+  function openQuick(l) {
+    var stands = Store.objekti().filter(function (o) { return Array.isArray(l.stajalista) && l.stajalista.indexOf(o.id) !== -1; });
+    var lovci = Store.lovci();
+    var q = { species: '', n: 0, trofej: null, rogovlje: '' };
+    var html = '<h2>' + esc(t('lovQuickTitle')) + '</h2><p class="sheet-sub" id="q-sub">' + esc((l.naziv || t('lovDefaultName')) + ' · ' + UI.fmtDay(String(l.datum).slice(0, 10))) + '</p>' +
+      '<form id="q-form" novalidate>' +
+      '<div class="species-grid four">' + QUICK_SPECIES.map(function (v) {
+        return '<button type="button" class="species-btn" data-sp="' + esc(v) + '" aria-pressed="false">' + ICONS.forSpecies(v) + '<span>' + esc(I18n.species(v)) + '</span></button>';
+      }).join('') + '</div>' +
+      '<div class="field" style="margin-top:12px"><span class="field-label req">' + esc(t('lblSpol')) + '</span><div class="radio-group">' +
+      '<label><input type="radio" name="q-spol" value="m"><span>' + esc(t('spolM')) + '</span></label><label><input type="radio" name="q-spol" value="ž"><span>' + esc(t('spolZ')) + '</span></label></div></div>' +
+      '<div class="field"><span class="field-label req">' + esc(t('klasa')) + '</span><div class="radio-group klasa-group">' +
+      QUICK_KLASE.map(function (k) { return '<label><input type="radio" name="q-klasa" value="' + esc(k) + '"><span data-klasa="' + esc(k) + '">' + esc(I18n.klasaFor('', k)) + '</span></label>'; }).join('') + '</div></div>' +
+      '<div id="q-trofej"></div>' +
+      '<div class="grid-2"><div class="field"><label class="field-label req" for="q-kg">' + esc(t('lblTezinaShort')) + '</label><div class="unit-wrap"><input type="number" id="q-kg" inputmode="decimal" min="1" step="0.5"><span>kg</span></div></div>' +
+      '<div class="field"><label class="field-label req" for="q-marka">' + esc(t('lblMarkica')) + '</label><input type="text" id="q-marka" inputmode="numeric"></div></div>' +
+      (stands.length ? '<div class="field"><label class="field-label" for="q-stand">' + esc(t('lblStand')) + '</label><select id="q-stand"><option value="">—</option>' +
+        stands.map(function (o) { return '<option value="' + esc(o.id) + '">' + esc(Objekti.name(o)) + '</option>'; }).join('') + '</select></div>' : '') +
+      '<div class="field"><label class="field-label req" for="q-lovac">' + esc(t('lblLovac')) + '</label><input type="text" id="q-lovac" list="q-lovci" autocomplete="off" placeholder="' + esc(t('phLovac')) + '"><datalist id="q-lovci">' +
+      lovci.concat(String(l.sudionici || '').split(/\n|,/).map(function (x) { return x.trim(); }).filter(Boolean)).map(function (n) { return '<option value="' + esc(n) + '">'; }).join('') + '</datalist></div>' +
+      '<div class="field"><label class="field-label" id="q-nap-label" for="q-nap">' + esc(t('lblNapomena')) + '</label><textarea id="q-nap" rows="2"></textarea>' +
+      '<button type="button" class="btn small" id="q-nap-ok" style="margin-top:8px" hidden>' + ICONS.check + esc(t('btnNoAnomalies')) + '</button></div>' +
+      '<label style="display:flex;gap:12px;align-items:center;font-weight:600;min-height:44px;margin-bottom:8px"><input type="checkbox" id="q-cold" checked style="width:22px;height:22px">' + esc(t('coldCheck')) + '</label>' +
+      '<div class="error-msg" id="q-err" hidden></div>' +
+      '<button type="submit" class="btn primary block" style="min-height:52px">' + esc(t('btnSave')) + '</button></form>';
+    UI.openSheet(html, function (el) {
+      function klasa() { var k = el.querySelector('input[name=q-klasa]:checked'); return k ? k.value : ''; }
+      function spol() { var x = el.querySelector('input[name=q-spol]:checked'); return x ? x.value : ''; }
+      function trofej() {
+        var nacin = Odstrjel.trofejNacin(q.species, spol(), klasa());
+        if (nacin === 'foto') nacin = '';
+        if (nacin === q.trofej) return;
+        q.trofej = nacin;
+        el.querySelector('#q-trofej').innerHTML = Odstrjel.trofejHtml(nacin, { rogovlje: '' }, { photo: false, ocjena: false });
+      }
+      function setSpecies(v) {
+        q.species = v;
+        UI.$$('.species-btn', el).forEach(function (b) { b.setAttribute('aria-pressed', String(b.getAttribute('data-sp') === v)); });
+        UI.$$('[data-klasa]', el).forEach(function (x) { x.textContent = I18n.klasaFor(v, x.getAttribute('data-klasa')); });
+        var svinja = v === 'Divlja svinja';
+        el.querySelector('#q-nap-label').classList.toggle('req', svinja);
+        el.querySelector('#q-nap-ok').hidden = !svinja;
+        trofej();
+      }
+      UI.$$('.species-btn', el).forEach(function (b) { b.onclick = function () { setSpecies(b.getAttribute('data-sp')); }; });
+      UI.$$('input[name=q-spol], input[name=q-klasa]', el).forEach(function (r) { r.onchange = trofej; });
+      el.querySelector('#q-nap-ok').onclick = function () { var n = el.querySelector('#q-nap'); if (!n.value.trim()) n.value = I18n._dict.hr.btnNoAnomalies.toLowerCase(); };
+      el.querySelector('#q-form').addEventListener('submit', async function (ev) {
+        ev.preventDefault();
+        var err = el.querySelector('#q-err'); err.hidden = true;
+        function fail(m) { err.textContent = m; err.hidden = false; }
+        var v = function (id) { var x = el.querySelector('#' + id); return x ? x.value.trim() : ''; };
+        var data = { vrsta: q.species, spol: spol(), dobnaKlasa: klasa(), tezina: v('q-kg'), brojMarkice: v('q-marka'), lovac: v('q-lovac'),
+          napomena: v('q-nap'), lokacija: l.lokacija, datum: String(l.datum).slice(0, 10), nacinLova: 'Prigon/pogon', lovId: l.id,
+          stajaliste: v('q-stand'), lat: '', lon: '', zona: '', vrijemeOdstrjela: '' };
+        if (!data.vrsta) return fail(t('errSelectVrsta'));
+        if (!data.spol || !data.dobnaKlasa || !data.tezina || !data.brojMarkice || !data.lovac) return fail(t('errRequired'));
+        if (!(Number(data.tezina) > 0)) return fail(t('errTezina'));
+        if (data.vrsta === 'Divlja svinja' && !data.napomena) return fail(t('errSvinjaNapomena'));
+        if (q.trofej === 'vrhovi') {
+          var n = Number(v('rog-vrhovi'));
+          if (!(n >= 2 && n <= 30) || Math.round(n) !== n) return fail(t('errVrhovi'));
+          data.rogovlje = String(n);
+        } else if (q.trofej === 'lopata') {
+          var lp = el.querySelector('input[name=lopata]:checked');
+          if (!lp) return fail(t('errLopata'));
+          data.rogovlje = lp.value;
+        }
+        var stand = data.stajaliste ? Store.objekti().filter(function (o) { return o.id === data.stajaliste; })[0] : null;
+        if (stand && Number(stand.lat)) { data.lat = stand.lat; data.lon = stand.lon; data.zona = await Geo.ortLabel(stand.lat, stand.lon) || ''; }
+        data.id = Store.uuid();
+        await Store.queueSubmit(data);
+        if (el.querySelector('#q-cold').checked) {
+          await Store.queueUpsert('wildbret', { id: data.id, hladnjacaOd: UI.nowLocalISO(), aspUzorak: '', aspNalaz: data.vrsta === 'Divlja svinja' ? 'ceka' : '' });
+        }
+        App.syncNow({ quiet: true });
+        q.n++;
+        UI.toast(kategorija(data.vrsta, data.spol, data.dobnaKlasa, I18n.lang()) + ' · #' + data.brojMarkice + ' — ' + t('saved'));
+        // Für das nächste Stück leeren; Wildart bleibt (meist mehrere Sauen hintereinander)
+        ['q-kg', 'q-marka', 'q-lovac', 'q-nap'].forEach(function (id) { el.querySelector('#' + id).value = ''; });
+        if (el.querySelector('#q-stand')) el.querySelector('#q-stand').value = '';
+        UI.$$('input[name=q-spol], input[name=q-klasa]', el).forEach(function (r) { r.checked = false; });
+        q.trofej = null; el.querySelector('#q-trofej').innerHTML = '';
+        el.querySelector('#q-sub').textContent = (l.naziv || t('lovDefaultName')) + ' · ' + UI.fmtDay(String(l.datum).slice(0, 10)) + ' · ' + t('lovQuickN', { n: q.n });
+        el.scrollTop = 0;
+      });
+    }, { noFocus: true });
+  }
 
   function openForm(l) {
     var lovci = Store.lovci();

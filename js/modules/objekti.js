@@ -1,12 +1,12 @@
 /**
  * Reviereinrichtungen (Hochsitze, Kirrungen, Salzlecken …). Symbole aus der QField-Feldkarte.
  * Rechte (Server prüft verbindlich): Jäger legen neu an und melden Zustand/Bemerkung/Foto;
- * die Verwaltung verschiebt, setzt „uklonjen" (abgebaut — Kirrungsabbau nachweisbar) und löscht.
+ * das Team verschiebt und löscht (abgebaute Einrichtungen werden gelöscht, kein eigener Zustand mehr).
  */
 var Objekti = (function () {
   var esc = UI.esc, t = I18n.t;
-  var ARTEN = ['kanzel', 'leiter', 'drueckjagdbock', 'bodensitz', 'kirrung', 'salzlecke', 'suhle', 'fuetterung', 'schranke', 'kamera'];
-  var STANJA = ['dobro', 'popravak', 'neupotrebljivo', 'uklonjen'];
+  var ARTEN = ['kanzel', 'leiter', 'drueckjagdbock', 'bodensitz', 'kirrung', 'salzlecke', 'suhle', 'fuetterung', 'schranke', 'kamera', 'zentrale', 'jagdhuette'];
+  var STANJA = ['dobro', 'popravak', 'neupotrebljivo'];
   var BADGE = { dobro: 'ok', popravak: 'warn', neupotrebljivo: 'warn', uklonjen: 'muted' };
 
   function byId(id) { return Store.objekti().filter(function (o) { return o.id === id; })[0]; }
@@ -65,7 +65,7 @@ var Objekti = (function () {
     var lastArt = (await DB.get('lastObjArt')) || 'kanzel';
     var st = { art: o ? o.art : lastArt, stanje: o ? (o.stanje || 'dobro') : 'dobro', foto: '' };
     var lok = o ? o.lokacija : await Geo.lovisteAt(opts.lat, opts.lon);
-    var stanja = STANJA.filter(function (s) { return up || s !== 'uklonjen' || (o && o.stanje === 'uklonjen'); });
+    var stanja = STANJA.concat(o && o.stanje === 'uklonjen' ? ['uklonjen'] : []); // alter Wert bleibt sichtbar
 
     var html = '<h2>' + esc(o ? (limited ? t('reportState') : t('editObjekt')) : t('newObjekt')) + '</h2>' +
       '<p class="sheet-sub">' + esc(lok || t('outsideGrounds')) + (o ? ' · ' + esc(name(o)) : '') + '</p>' +
@@ -78,7 +78,7 @@ var Objekti = (function () {
         '<div class="field"><label class="field-label" for="obj-naziv">' + esc(t('objNaziv')) + '</label><input type="text" id="obj-naziv" value="' + esc(o ? o.naziv : '') + '"></div></div>') +
       '<div class="field"><span class="field-label">' + esc(t('objStanje')) + '</span><div class="seg" id="stanje-seg">' +
       stanja.map(function (s) { return '<button type="button" data-st="' + s + '" aria-pressed="' + (st.stanje === s) + '">' + esc(I18n.stanje(s)) + '</button>'; }).join('') + '</div>' +
-      (up ? '' : '<p class="hint">' + esc(t('uklonjenHint')) + '</p>') + '</div>' +
+      '</div>' +
       '<div class="field"><label class="field-label" for="obj-nap">' + esc(t('lblNapomena')) + '</label><textarea id="obj-nap" placeholder="' + esc(t('phObjNapomena')) + '">' + esc(o ? o.napomena : '') + '</textarea></div>' +
       '<div class="field"><label class="field-label" for="obj-foto">' + esc(t('lblFoto')) + '</label><input type="file" id="obj-foto" accept="image/*" capture="environment"><div class="photo-preview" id="obj-prev"></div></div>' +
       '<div class="error-msg" id="obj-err" hidden></div>' +

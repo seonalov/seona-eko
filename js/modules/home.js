@@ -24,6 +24,19 @@
     return out;
   }
 
+  /** Nächster Ansitz-Termin eines Gastes (ab heute); sonst der nächste ankommende Gast. */
+  function nextGast() {
+    var today = UI.todayISO();
+    var gosti = Store.gosti();
+    function byId(id) { return gosti.filter(function (g) { return g.id === id; })[0]; }
+    var a = Store.ansitzi().filter(function (x) { return String(x.datum).slice(0, 10) >= today && byId(x.gostId); })
+      .sort(function (x, y) { return String(x.datum).localeCompare(String(y.datum)); })[0];
+    if (a) return { g: byId(a.gostId), sub: [UI.fmtDay(String(a.datum).slice(0, 10)), a.polazak, a.ceka].filter(Boolean).join(' · ') };
+    var g = gosti.filter(function (x) { return String(x.od || '').slice(0, 10) >= today; })
+      .sort(function (x, y) { return String(x.od).localeCompare(String(y.od)); })[0];
+    return g ? { g: g, sub: UI.fmtDay(String(g.od).slice(0, 10)) + (g.do ? ' – ' + UI.fmtDay(String(g.do).slice(0, 10)) : '') } : null;
+  }
+
   App.route('home', {
     nav: 'home',
     render: function () {
@@ -38,7 +51,7 @@
       var errors = Store.outbox().filter(function (e) { return e.status === 'error'; }).length;
       // Seit über einem Tag nicht gesendet (z. B. Handy nie mit Netz geöffnet) — nicht nur oben rechts klein anzeigen
       var stale = Store.outbox().filter(function (e) { return e.status !== 'error' && Date.now() - e.createdAt > 864e5; }).length;
-      var heuteGaeste = Store.ansitzi().filter(function (a) { return String(a.datum).slice(0, 10) === UI.todayISO(); });
+      var gast = nextGast();
 
       var pct = function (a, b) { return b ? Math.min(100, Math.round(a / b * 100)) : 0; };
 
@@ -52,18 +65,12 @@
           ICONS.sync.replace('<svg', '<svg style="width:24px;height:24px;color:var(--warn);flex:none"') + '<span><b>' + esc(t('homeStale', { n: stale })) + '</b><br><span class="hint">' + esc(t('homeStaleHint')) + '</span></span></a>' : '') +
 
         '<div class="quick">' +
-        '<a class="primary" href="#/odstrjel/novi">' + ICONS.plus + '<span><b>' + esc(t('newOdstrjel')) + '</b><span>' + esc(t('newOdstrjelSub')) + '</span></span></a>' +
+        '<a class="primary" href="#/odstrjel/novi">' + ICONS.plus + '<span><b>' + esc(t('newOdstrjel')) + '</b></span></a>' +
         '<a class="secondary" href="#/karta?add=1">' + ICONS.pin + '<span>' + esc(t('quickObjekt')) + '</span></a>' +
         '<a class="secondary" href="#/lovostaj">' + ICONS.calendar + '<span>' + esc(t('quickLovostaj')) + '</span></a>' +
         '</div>' +
 
         '<div style="margin-top:12px">' + WetterUI.tile() + '</div>' +
-        (heuteGaeste.length ? '<div class="section-title"><h2>' + esc(t('guestsToday')) + '</h2><a href="#/gosti">' + esc(t('all')) + '</a></div>' +
-          '<div class="panel flush"><ul class="list">' + heuteGaeste.map(function (a) {
-            var g = Store.gosti().filter(function (x) { return x.id === a.gostId; })[0];
-            return '<li><a class="row" href="#/gosti/' + encodeURIComponent(a.gostId) + '"><span class="r-icon">' + ICONS.group + '</span><span class="r-main"><span class="r-title">' + esc((g ? g.ime : '') + (a.polazak ? ' · ' + a.polazak : '')) + '</span>' +
-              '<span class="r-sub">' + esc([a.ceka, a.pratitelj].filter(Boolean).join(' · ')) + '</span></span></a></li>';
-          }).join('') + '</ul></div>' : '') +
         '<div class="grid-2" style="margin-top:12px">' +
         '<a class="tile" href="#/odstrjel"><div class="t-label">' + ICONS.list + esc(t('tileStrecke')) + '</div>' +
         '<div class="t-value">' + s.ist + ' <small>/ ' + s.soll + '</small></div>' +
@@ -77,19 +84,15 @@
         '<div class="section-title"><h2>' + esc(t('openToday')) + '</h2><a href="#/lovostaj">' + esc(t('allSeasons')) + '</a></div>' +
         '<div class="panel"><div class="chips" style="flex-wrap:wrap">' +
         (open.length ? open.map(function (r) { return '<span class="badge ok">' + esc(t(r.key)) + '</span>'; }).join('') : '<span class="hint">' + esc(t('nothingOpen')) + '</span>') +
-        '</div><p class="hint" style="margin-top:10px">' + esc(t('openTodayHint')) + '</p></div>' +
+        '</div></div>' +
 
-        '<div class="section-title"><h2>' + esc(t('planTitle')) + '</h2><a href="#/odstrjel?tab=plan">' + esc(t('details')) + '</a></div>' +
-        '<div class="panel stack">' +
-        '<div><div style="display:flex;justify-content:space-between"><span>' + esc(t('planPrasad')) + '</span><b class="num">' + s.prasad + ' / ' + s.prasadSoll + '</b></div><div class="bar"><span style="width:' + pct(s.prasad, s.prasadSoll) + '%"></span></div></div>' +
-        '<div style="display:flex;justify-content:space-between"><span>' + esc(t('planKrmace')) + '</span><b class="num">' + s.krmace + '</b></div>' +
-        '<div style="display:flex;justify-content:space-between"><span>' + esc(t('femaleShare')) + '</span><b class="num">' + (s.zenskoPct == null ? '—' : s.zenskoPct + ' %') + '</b></div>' +
-        '<p class="hint" style="margin:0">' + esc(t('planHint')) + '</p></div>' +
-
-        '<div class="section-title"><h2>' + esc(t('nextLov')) + '</h2><a href="#/lovovi">' + esc(t('all')) + '</a></div>' +
-        (next ? '<div class="panel flush"><ul class="list"><li><a class="row" href="#/lov/' + esc(next.id) + '"><span class="r-icon">' + ICONS.group + '</span>' +
-          '<span class="r-main"><span class="r-title">' + esc(next.naziv || t('lovDefaultName')) + '</span><span class="r-sub">' + esc(UI.fmtDay(next.datum) + ' · ' + Strecke.shortLov(next.lokacija)) + '</span></span>' + ICONS.chevron.replace('<svg', '<svg class="chev"') + '</a></li></ul></div>'
-          : '<div class="panel"><p class="hint" style="margin:0">' + esc(t('noNextLov')) + '</p>' + (App.isUprava() ? '<a class="btn small" style="margin-top:10px" href="#/lovovi?new=1">' + ICONS.plus + esc(t('newLov')) + '</a>' : '') + '</div>') +
+        // Nächste Drückjagd und nächster Gast — nur, wenn etwas ansteht
+        (next ? '<div class="section-title"><h2>' + esc(t('nextLov')) + '</h2><a href="#/lovovi">' + esc(t('all')) + '</a></div>' +
+          '<div class="panel flush"><ul class="list"><li><a class="row" href="#/lov/' + esc(next.id) + '"><span class="r-icon">' + ICONS.group + '</span>' +
+          '<span class="r-main"><span class="r-title">' + esc(next.naziv || t('lovDefaultName')) + '</span><span class="r-sub">' + esc(UI.fmtDay(next.datum) + ' · ' + Strecke.shortLov(next.lokacija)) + '</span></span>' + ICONS.chevron.replace('<svg', '<svg class="chev"') + '</a></li></ul></div>' : '') +
+        (gast ? '<div class="section-title"><h2>' + esc(t('nextGuest')) + '</h2><a href="#/gosti">' + esc(t('all')) + '</a></div>' +
+          '<div class="panel flush"><ul class="list"><li><a class="row" href="#/gosti/' + encodeURIComponent(gast.g.id) + '"><span class="r-icon">' + ICONS.qr + '</span>' +
+          '<span class="r-main"><span class="r-title">' + esc(gast.g.ime) + '</span><span class="r-sub">' + esc(gast.sub) + '</span></span>' + ICONS.chevron.replace('<svg', '<svg class="chev"') + '</a></li></ul></div>' : '') +
 
         (recent.length ? '<div class="section-title"><h2>' + esc(t('recent')) + '</h2><a href="#/odstrjel">' + esc(t('all')) + '</a></div>' +
           '<div class="panel flush"><ul class="list">' + recent.map(Strecke.rowHtml).join('') + '</ul></div>' : '');

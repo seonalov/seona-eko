@@ -21,6 +21,29 @@ var Geo = (function () {
     });
   }
 
+  /**
+   * Frische, möglichst genaue Position: wartet bis ≤ 15 m Genauigkeit oder höchstens maxMs und nimmt die beste.
+   * (getCurrentPosition liefert sonst oft die erste, grobe Ortung oder eine alte aus dem Zwischenspeicher.)
+   */
+  function precise(maxMs) {
+    return new Promise(function (resolve, reject) {
+      if (!navigator.geolocation) return reject(new Error('nogps'));
+      var best = null, id = null, timer = null;
+      function finish() {
+        if (id !== null) navigator.geolocation.clearWatch(id);
+        clearTimeout(timer);
+        if (best) resolve(best); else reject(new Error('timeout'));
+      }
+      id = navigator.geolocation.watchPosition(function (p) {
+        var cur = { lat: +p.coords.latitude.toFixed(6), lon: +p.coords.longitude.toFixed(6), acc: Math.round(p.coords.accuracy) };
+        if (!best || cur.acc <= best.acc) best = cur;
+        if (best.acc <= 15) finish();
+      }, function (err) { if (id !== null) navigator.geolocation.clearWatch(id); clearTimeout(timer); if (best) resolve(best); else reject(err); },
+      { enableHighAccuracy: true, maximumAge: 0, timeout: maxMs || 10000 });
+      timer = setTimeout(finish, maxMs || 10000);
+    });
+  }
+
   function inRing(x, y, ring) {
     var inside = false;
     for (var i = 0, j = ring.length - 1; i < ring.length; j = i++) {
@@ -109,5 +132,5 @@ var Geo = (function () {
     return { rise: calc(true), set: calc(false) };
   }
 
-  return { loadGeo: loadGeo, position: position, inGeometry: inGeometry, lovisteAt: lovisteAt, odjelAt: odjelAt, nameNear: nameNear, ortLabel: ortLabel, dist: dist, sunTimes: sunTimes };
+  return { loadGeo: loadGeo, position: position, precise: precise, inGeometry: inGeometry, lovisteAt: lovisteAt, odjelAt: odjelAt, nameNear: nameNear, ortLabel: ortLabel, dist: dist, sunTimes: sunTimes };
 })();

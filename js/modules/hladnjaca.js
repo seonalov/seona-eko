@@ -84,7 +84,7 @@
     var old = D.inCold.filter(function (w) { return days(w.hladnjacaOd) >= 7; }).length;
     var pos = D.inCold.filter(function (w) { return w.aspNalaz === 'pozitivan'; }).length;
     return (pos ? '<div class="panel alert-panel"><b>' + esc(t('aspPositiveTitle')) + '</b><p class="hint">' + esc(t('aspPositiveText')) + '</p></div>' : '') +
-      (old ? '<div class="panel alert-panel soft"><b>' + esc(t('coldOld', { n: old })) + '</b><p class="hint">' + esc(t('coldOldHint')) + '</p></div>' : '') +
+      (old ? '<div class="panel alert-panel soft"><b>' + esc(t('coldOld', { n: old })) + '</b></div>' : '') +
       (D.inCold.length ? '<div class="panel flush"><ul class="list">' + D.inCold.map(function (w) { return rowCold(w, D.byId[w.id]); }).join('') + '</ul></div>'
         : '<div class="panel">' + UI.emptyState('cold', t('coldEmpty'), t('coldEmptyText')) + '</div>') +
       '<p class="hint steps-legend">' + steps({ aspUzorak: 1, aspPoslano: 1, aspNalaz: 'negativan', predanoDatum: 1 }, { vrsta: 'Divlja svinja' }) + ' ' + esc(t('stepsLegend')) + '</p>' +
@@ -124,12 +124,12 @@
   }
 
   App.route('hladnjaca', {
-    nav: 'vise',
+    nav: 'odstrjel',
     render: function (ctx) {
       if (ctx.query.tab) state.tab = ctx.query.tab;
       var D = data();
       var waiting = D.asp.notSent.length + D.asp.noSample.length, sent = D.asp.sent.length;
-      return '<div class="page-head"><div class="eyebrow">' + esc(t('wildbret')) + '</div><h1>' + esc(t('coldTitle', { n: D.inCold.length })) + '</h1>' +
+      return Strecke.tabs('cold') + '<div class="page-head"><div class="eyebrow">' + esc(t('wildbret')) + '</div><h1>' + esc(t('coldTitle', { n: D.inCold.length })) + '</h1>' +
         '<p>' + esc(t('aspSummary', { a: waiting, b: sent })) + '</p></div>' +
         '<div class="seg" id="cold-tabs" style="margin-bottom:12px">' +
         '<button type="button" data-tab="zelle" aria-pressed="' + (state.tab === 'zelle') + '">' + esc(t('tabCold')) + '</button>' +

@@ -34,17 +34,18 @@ var App = (function () {
     if (role === 'gost' && GOST_ROUTES.indexOf(r.name) === -1) { history.replaceState(null, '', '#/gost'); r = parseHash(); }
     var def = routes[r.name] || routes.home;
     var view = document.getElementById('view');
+    dirty = false;
     if (active && active.def.unmount) { try { active.def.unmount(); } catch (e) { console.error(e); } }
     UI.closeSheet(true);
     var ctx = { params: r.params, query: r.query, name: r.name };
     active = { name: r.name, def: def, ctx: ctx };
     view.className = def.full ? 'full' : '';
-    var y = window.scrollY;
+    var y = view.scrollTop;
     view.innerHTML = def.render ? def.render(ctx) : '';
     injectIcons(view);
     I18n.apply(view);
     if (def.mount) def.mount(view, ctx);
-    if (keepScroll) window.scrollTo(0, y); else window.scrollTo(0, 0);
+    view.scrollTop = keepScroll ? y : 0;
     UI.$$('#bottomnav a').forEach(function (a) {
       if (a.getAttribute('data-nav') === (def.nav || r.name)) a.setAttribute('aria-current', 'page');
       else a.removeAttribute('aria-current');
@@ -52,10 +53,13 @@ var App = (function () {
   }
 
   /** Datenänderung → aktuelle Seite neu zeichnen (außer Formularseiten, live:false). */
+  var dirty = false;
   function refreshView() {
     if (!active) return;
     if (active.def.live === false) { if (active.def.onData) active.def.onData(); return; }
-    if (document.querySelector('.sheet')) return; // offenes Sheet nicht wegreißen
+    // offenes Sheet nicht wegreißen — nachholen, sobald es zu ist
+    if (UI.isSheetOpen()) { dirty = true; return; }
+    dirty = false;
     render(true);
   }
 
@@ -83,19 +87,45 @@ var App = (function () {
     text.textContent = label;
   }
 
+  /**
+   * Senden + Abgleich. Läuft schon einer, wird danach noch einmal gesendet (nichts bleibt liegen).
+   * Kein Netz oder Server beschäftigt → von selbst erneut nach 5 s, 15 s, 30 s, dann jede Minute,
+   * solange etwas wartet. navigator.onLine wird nicht vertraut (auf dem iPhone oft falsch) — es wird einfach versucht.
+   */
+  var RETRY = [5, 15, 30, 60];
+  var retryStep = 0, retryTimer = null, queued = null, lastPull = 0;
   async function syncNow(opts) {
-    if (!navigator.onLine) { updateSyncPill(); return null; }
-    var res = await Sync.run();
+    opts = opts || {};
+    if (Sync.isRunning()) {
+      queued = Object.assign(queued || {}, { pull: !!(opts.pull || (queued && queued.pull)), quiet: true });
+      return null;
+    }
+    if (!(await DB.get('code'))) return null; // noch nicht eingerichtet
+    var waiting = Store.outbox().filter(function (e) { return e.status !== 'error'; }).length;
+    if (!waiting && opts.pull && opts.quiet && Date.now() - lastPull < 5000) return null; // gerade erst abgeglichen
+    if (retryTimer) { clearTimeout(retryTimer); retryTimer = null; }
+    var res = await Sync.run({ pull: true });
     if (res.authError) syncState = 'auth';
     else if (res.networkError) syncState = 'offline';
     else syncState = 'ok';
+    if (res.pull) { await Store.applyPull(res.pull, res.pullStartedAt); lastPull = Date.now(); }
     await Store.reloadOutbox();
-    if (res.sent.length || (opts && opts.pull)) {
+    if (!res.pull && !res.networkError && !res.authError && (res.sent.length || opts.pull)) {
+      var startedPull = Date.now();
       var p = await Store.refresh();
       if (p === 'auth') syncState = 'auth';
+      else if (p === 'offline') syncState = 'offline';
+      else if (p === 'ok') lastPull = startedPull;
     }
     updateSyncPill();
-    if (res.warnings.length && !(opts && opts.quiet)) UI.toast(res.warnings.join(' '), { timeout: 7000 });
+    if (res.warnings.length && !opts.quiet) UI.toast(res.warnings.join(' '), { timeout: 7000 });
+    // Wiederholen, solange etwas wartet und es am Netz/Server lag
+    var still = Store.outbox().filter(function (e) { return e.status !== 'error'; }).length;
+    if (still && (res.networkError || res.busy || syncState === 'offline')) {
+      retryTimer = setTimeout(function () { retryTimer = null; syncNow({ quiet: true }); }, RETRY[Math.min(retryStep, RETRY.length - 1)] * 1000);
+      retryStep++;
+    } else retryStep = 0;
+    if (queued) { var q = queued; queued = null; return syncNow(q); }
     return res;
   }
 
@@ -308,7 +338,10 @@ var App = (function () {
     injectIcons(document.getElementById('bottomnav'));
     document.getElementById('sync-pill').onclick = function () { go('#/vise?sync=1'); };
     window.addEventListener('hashchange', function () { render(); });
-    window.addEventListener('online', function () { syncState = 'ok'; syncNow({ pull: true, quiet: true }); });
+    window.addEventListener('online', function () { syncState = 'ok'; retryStep = 0; syncNow({ pull: true, quiet: true }); });
+    window.addEventListener('focus', function () { syncNow({ pull: true, quiet: true }); });
+    window.addEventListener('pageshow', function () { syncNow({ pull: true, quiet: true }); });
+    UI.onSheetClosed(function () { if (dirty) refreshView(); });
     window.addEventListener('offline', updateSyncPill);
     Sync.onChange(updateSyncPill);
     Store.onChange(function () {
@@ -337,10 +370,10 @@ var App = (function () {
     syncNow({ pull: true, quiet: true }).then(function () { Tutorial.maybeShow(); autoSaveMap(); });
     // Solange die App offen ist: alle 90 s abgleichen (Stand anderer Jäger, Drückjagden …)
     setInterval(function () {
-      if (document.visibilityState === 'visible' && navigator.onLine) syncNow({ pull: true, quiet: true });
+      if (document.visibilityState === 'visible') syncNow({ pull: true, quiet: true });
     }, 90000);
     document.addEventListener('visibilitychange', function () {
-      if (document.visibilityState === 'visible' && navigator.onLine) syncNow({ pull: true, quiet: true });
+      if (document.visibilityState === 'visible') { retryStep = 0; syncNow({ pull: true, quiet: true }); }
     });
   }
 

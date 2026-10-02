@@ -25,7 +25,7 @@
  ],
  "minZoom": 11,
  "maxNativeZoom": 16,
- "tiles": 986,
- "quelle": "QField-Feldkarte Loviste_GMOT_Uebersicht_2m (70_Karten/80_Fachlayer/90_QField)",
- "gebaut": "2026-09-24"
+ "tiles": 1163,
+ "quelle": "QField-Feldkarte Loviste_GMOT_Feldkarte.qgs (70_Karten/80_Fachlayer/90_QField), gerendert mit QGIS",
+ "gebaut": "2026-10-02"
 }

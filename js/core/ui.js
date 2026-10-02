@@ -66,26 +66,68 @@ var UI = (function () {
     sheet.className = 'sheet';
     sheet.setAttribute('role', 'dialog');
     sheet.setAttribute('aria-modal', 'true');
-    sheet.innerHTML = '<div class="grip"></div>' + html;
+    sheet.innerHTML = '<div class="grip-zone"><div class="grip"></div>' +
+      '<button type="button" class="sheet-x" aria-label="' + esc(I18n.t('close')) + '">' + ICONS.close + '</button></div>' + html;
     document.body.appendChild(scrim);
     document.body.appendChild(sheet);
     requestAnimationFrame(function () { scrim.classList.add('show'); sheet.classList.add('show'); });
     var api = { el: sheet, close: function () { closeSheet(); } };
     current = { scrim: scrim, sheet: sheet, onClose: opts && opts.onClose };
     scrim.addEventListener('click', function () { closeSheet(); });
+    sheet.querySelector('.sheet-x').addEventListener('click', function () { closeSheet(); });
+    swipeToClose(sheet);
     if (onMount) onMount(sheet, api);
     var focusable = sheet.querySelector('input,select,textarea,button');
     if (focusable && !(opts && opts.noFocus)) setTimeout(function () { try { focusable.focus({ preventScroll: true }); } catch (e) {} }, 60);
     return api;
   }
+  var closedListeners = [];
   function closeSheet(immediate) {
     if (!current) return;
     var c = current; current = null;
     if (c.onClose) try { c.onClose(); } catch (e) {}
+    closedListeners.forEach(function (fn) { try { fn(); } catch (e) {} });
     if (immediate) { c.scrim.remove(); c.sheet.remove(); return; }
+    c.sheet.style.transform = '';
     c.scrim.classList.remove('show'); c.sheet.classList.remove('show');
     setTimeout(function () { c.scrim.remove(); c.sheet.remove(); }, 230);
   }
+
+  /**
+   * Nach unten wegwischen: am Griff/Kopf immer; im Inhalt nur, wenn er ganz oben steht (sonst wird gescrollt).
+   * Das Sheet folgt dem Finger; ab 80 px oder schnellem Wisch zu, sonst federt es zurück.
+   */
+  function swipeToClose(sheet) {
+    var startY = 0, startT = 0, dy = 0, active = false, fromTop = false;
+    sheet.addEventListener('touchstart', function (e) {
+      if (e.touches.length !== 1) return;
+      var t = e.target;
+      if (t.closest && t.closest('input,textarea,select,.chips,.leaflet-container')) { active = false; return; }
+      fromTop = !!(t.closest && t.closest('.grip-zone'));
+      startY = e.touches[0].clientY; startT = Date.now(); dy = 0;
+      active = fromTop || sheet.scrollTop <= 0;
+    }, { passive: true });
+    sheet.addEventListener('touchmove', function (e) {
+      if (!active) return;
+      dy = e.touches[0].clientY - startY;
+      if (dy <= 0) { if (!fromTop) active = false; sheet.style.transform = ''; return; }
+      if (!fromTop && sheet.scrollTop > 0) { active = false; return; }
+      e.preventDefault();
+      sheet.style.transition = 'none';
+      sheet.style.transform = 'translateY(' + dy + 'px)';
+    }, { passive: false });
+    function end() {
+      if (!active) return;
+      active = false;
+      sheet.style.transition = '';
+      var fast = dy > 30 && dy / Math.max(1, Date.now() - startT) > 0.5;
+      if (dy > 80 || fast) closeSheet();
+      else sheet.style.transform = '';
+    }
+    sheet.addEventListener('touchend', end);
+    sheet.addEventListener('touchcancel', end);
+  }
+
   document.addEventListener('keydown', function (e) { if (e.key === 'Escape') closeSheet(); });
 
   /** Bestätigung im Sheet — confirm() gibt es in manchen Ansichten nicht. */
@@ -137,6 +179,13 @@ var UI = (function () {
     return res.dataUrl;
   }
 
+  /** Reiter oben in einem Menübereich (z. B. Strecke: Liste · Plan · Kühlzelle). items = [[href, label, aktiv]] */
+  function sectionTabs(items) {
+    return '<nav class="section-tabs">' + items.map(function (it) {
+      return '<a href="' + esc(it[0]) + '"' + (it[2] ? ' aria-current="page"' : '') + '>' + esc(it[1]) + '</a>';
+    }).join('') + '</nav>';
+  }
+
   function emptyState(icon, title, text, actionHtml) {
     return '<div class="empty">' + (ICONS[icon] || '') + '<b>' + esc(title) + '</b><p>' + esc(text) + '</p>' + (actionHtml || '') + '</div>';
   }
@@ -144,7 +193,8 @@ var UI = (function () {
   return {
     esc: esc, $: $, $$: $$, todayISO: todayISO, nowLocalISO: nowLocalISO, parseISO: parseISO,
     fmtDate: fmtDate, fmtDay: fmtDay, fmtLong: fmtLong, fmtTime: fmtTime, fmtStamp: fmtStamp, daysSince: daysSince,
-    toast: toast, hideToast: hideToast, openSheet: openSheet, closeSheet: closeSheet, confirm: confirmSheet,
-    readPhoto: readPhoto, loadPhoto: loadPhoto, emptyState: emptyState
+    toast: toast, hideToast: hideToast, openSheet: openSheet, closeSheet: closeSheet,
+    isSheetOpen: function () { return !!current; }, onSheetClosed: function (fn) { closedListeners.push(fn); }, confirm: confirmSheet,
+    readPhoto: readPhoto, loadPhoto: loadPhoto, emptyState: emptyState, sectionTabs: sectionTabs
   };
 })();

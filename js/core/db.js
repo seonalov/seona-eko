@@ -47,6 +47,7 @@ var DB = (function () {
         return (list || []).sort(function (a, b) { return a.createdAt - b.createdAt; });
       });
     },
+    outboxGet: function (key) { return tx('outbox', 'readonly', function (s) { return s.get(key); }); },
     outboxPut: function (entry) { return tx('outbox', 'readwrite', function (s) { return s.put(entry); }); },
     outboxDelete: function (key) { return tx('outbox', 'readwrite', function (s) { return s.delete(key); }); }
   };

@@ -29,17 +29,11 @@
       return '<div class="page-head"><h1>' + esc(t('navVise')) + '</h1></div>' +
         '<div class="panel flush"><ul class="list">' +
         '<li><a class="row" href="#/lovostaj"><span class="r-icon">' + ICONS.calendar + '</span><span class="r-main"><span class="r-title">' + esc(t('quickLovostaj')) + '</span><span class="r-sub">' + esc(t('viseLovostajSub')) + '</span></span>' + ICONS.chevron.replace('<svg', '<svg class="chev"') + '</a></li>' +
-        '<li><a class="row" href="#/hladnjaca"><span class="r-icon">' + ICONS.cold + '</span><span class="r-main"><span class="r-title">' + esc(t('tileCold')) + '</span><span class="r-sub">' + esc(t('viseColdSub')) + '</span></span>' + ICONS.chevron.replace('<svg', '<svg class="chev"') + '</a></li>' +
-        '<li><a class="row" href="#/odstrjel?tab=plan"><span class="r-icon">' + ICONS.list + '</span><span class="r-main"><span class="r-title">' + esc(t('planTitle')) + '</span><span class="r-sub">' + esc(t('visePlanSub')) + '</span></span>' + ICONS.chevron.replace('<svg', '<svg class="chev"') + '</a></li>' +
+        '<li><a class="row" href="#/wetter"><span class="r-icon">' + ICONS.wPartly + '</span><span class="r-main"><span class="r-title">' + esc(t('weatherTitle')) + '</span><span class="r-sub">' + esc(t('next24h')) + '</span></span>' + ICONS.chevron.replace('<svg', '<svg class="chev"') + '</a></li>' +
         '</ul></div>' +
 
         (role === 'uprava' ? '<div class="panel flush" style="margin-top:12px"><ul class="list"><li><button type="button" class="row" id="tut-replay"><span class="r-icon">' + ICONS.check + '</span><span class="r-main"><span class="r-title">' + esc(t('tutReplay')) + '</span><span class="r-sub">' + esc(t('tutReplaySub')) + '</span></span>' + ICONS.chevron.replace('<svg', '<svg class="chev"') + '</button></li>' +
           '<li><button type="button" class="row" id="team-qr"><span class="r-icon">' + ICONS.qr + '</span><span class="r-main"><span class="r-title">' + esc(t('teamQrTitle')) + '</span><span class="r-sub">' + esc(t('teamQrSub')) + '</span></span>' + ICONS.chevron.replace('<svg', '<svg class="chev"') + '</button></li></ul></div>' : '') +
-        '<div class="section-title"><h2>' + esc(t('guestsTitle')) + '</h2></div>' +
-        '<div class="panel flush"><ul class="list">' +
-        '<li><a class="row" href="#/gosti"><span class="r-icon">' + ICONS.qr + '</span><span class="r-main"><span class="r-title">' + esc(t('guestsTitle')) + '</span><span class="r-sub">' + esc(t('guestsViseSub')) + '</span></span>' + ICONS.chevron.replace('<svg', '<svg class="chev"') + '</a></li>' +
-        '<li><a class="row" href="#/wetter"><span class="r-icon">' + ICONS.wPartly + '</span><span class="r-main"><span class="r-title">' + esc(t('weatherTitle')) + '</span><span class="r-sub">' + esc(t('next24h')) + '</span></span>' + ICONS.chevron.replace('<svg', '<svg class="chev"') + '</a></li>' +
-        '<li><a class="row" href="#/gost"><span class="r-icon">' + ICONS.group + '</span><span class="r-main"><span class="r-title">' + esc(t('guestView')) + '</span><span class="r-sub">' + esc(t('guestViewSub')) + '</span></span>' + ICONS.chevron.replace('<svg', '<svg class="chev"') + '</a></li></ul></div>' +
         '<div class="section-title" id="sync"><h2>' + esc(t('syncTitle')) + '</h2></div>' +
         '<div class="panel"><p style="margin:0 0 4px"><b>' + esc(ob.length ? t('pillPending', { n: ob.length }) : t('allSent')) + '</b></p>' +
         '<p class="hint" style="margin:0 0 12px">' + esc(t('lastPull', { t: UI.fmtStamp(Store.pulledAt()) })) + (ob.length ? ' · ' + esc(t('subKeep')) : '') + '</p>' +
@@ -60,8 +54,7 @@
         ['hr', 'en', 'de'].map(function (l) { return '<button type="button" data-lang="' + l + '" aria-pressed="' + (I18n.lang() === l) + '">' + l.toUpperCase() + '</button>'; }).join('') + '</div></div>' +
         '<div style="display:flex;justify-content:space-between;align-items:center;gap:10px"><span><span class="field-label" style="margin:0">' + esc(t('role')) + '</span>' +
         '<b>' + esc(role === 'uprava' ? t('roleUprava') : role === 'gost' ? t('roleGost') : '—') + '</b></span>' +
-        '<button type="button" class="btn small" id="change-code">' + esc(t('changeCode')) + '</button></div>' +
-        '<p class="hint" style="margin:0">' + esc(role === 'uprava' ? t('roleUpravaHint') : t('roleGostHint')) + '</p></div>' +
+        '<button type="button" class="btn small" id="change-code">' + esc(t('changeCode')) + '</button></div></div>' +
 
         '<div class="section-title"><h2>' + esc(t('about')) + '</h2></div>' +
         '<div class="panel"><p class="legal" style="margin:0 0 10px">' + esc(t('legal')) + '</p>' +

@@ -3,13 +3,13 @@
  * inhaltlich gleich (CLAUDE.md) → Gesamtbetrieb = × 3, kein Flächenfaktor.
  * Deckt sich mit Sheet_Vorlage_Struktur.md (Tab Plan-Izvršenje) und Code.gs::QUOTA_PER_LOVISTE.
  * Klassen = Werte der Spalte „Dobna klasa" im Sheet; `m`/`z` = Soll männlich/weiblich, wo die LGO sie trennt.
+ * Die App erfasst nur noch jung · Jährling · älter; Mittel- und reife Klasse der LGO sind deshalb zu „älter" zusammengefasst.
  */
 var PLAN = {
   'Jelen obični': [
     { klase: ['Tele/prase'], soll: 2, m: 1, z: 1 },
     { klase: ['Mlađa klasa'], soll: 2, m: 1, z: 1 },
-    { klase: ['Srednja klasa'], soll: 2, m: 1, z: 1 },
-    { klase: ['Zrela klasa'], soll: 2, m: 1, z: 1 }
+    { klase: ['Srednja klasa', 'Zrela klasa'], soll: 4, m: 2, z: 2 }
   ],
   'Srna': [
     { klase: ['Mlađa klasa'], soll: 2, m: 1, z: 1 },
@@ -23,8 +23,7 @@ var PLAN = {
   'Jelen lopatar': [
     { klase: ['Tele/prase'], soll: 3 },
     { klase: ['Mlađa klasa'], soll: 2 },
-    { klase: ['Srednja klasa'], soll: 2 },
-    { klase: ['Zrela klasa'], soll: 2 }
+    { klase: ['Srednja klasa', 'Zrela klasa'], soll: 4 }
   ]
 };
 var PLAN_SPECIES = ['Divlja svinja', 'Jelen obični', 'Jelen lopatar', 'Srna'];

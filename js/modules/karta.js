@@ -4,10 +4,11 @@
  * Einrichtungen werden über ein Fadenkreuz in der Kartenmitte eingetragen (einhändig bedienbar).
  */
 var MapOffline = (function () {
-  var CACHE = 'seona-karta-v1';
+  var CACHE = 'seona-karta-v2';
   // Team: tiles/ (QField-Karte mit Reviergrenzen) · Gäste: tiles_gast/ (dieselbe Karte ohne Grenzen)
   function prefix() { return App.isGost() ? 'tiles_gast' : 'tiles'; }
-  function flag() { return App.isGost() ? 'mapSavedGast' : 'mapSaved'; }
+  // Flag hängt an der Kartenversion: neue Karte (neuer Cache) → wird automatisch neu gespeichert
+  function flag() { return (App.isGost() ? 'mapSavedGast' : 'mapSaved') + ':' + CACHE; }
   async function status() {
     var saved = await DB.get(flag());
     return saved || null;
@@ -42,6 +43,18 @@ var MapOffline = (function () {
   return { status: status, download: download, prefix: prefix, CACHE: CACHE };
 })();
 
+/** Koordinate genau unter dem Fadenkreuz (statt map.getCenter(), das mit einer evtl. veralteten Kartengröße rechnet). */
+function punktUnterFadenkreuz(map, root) {
+  map.invalidateSize({ pan: false });
+  var ch = root.querySelector('.crosshair');
+  var c;
+  if (ch) {
+    var r = ch.getBoundingClientRect(), m = map.getContainer().getBoundingClientRect();
+    c = map.containerPointToLatLng([r.left + r.width / 2 - m.left, r.top + r.height / 2 - m.top]);
+  } else c = map.getCenter();
+  return { lat: +c.lat.toFixed(6), lon: +c.lng.toFixed(6) };
+}
+
 var Karta = (function () {
   var esc = UI.esc, t = I18n.t;
   var map = null, layers = {}, watchId = null, meMarker = null, meCircle = null, mode = null, focusMarker = null;
@@ -65,8 +78,22 @@ var Karta = (function () {
       '<button type="button" class="fab" id="fab-locate" aria-label="' + esc(t('myLocation')) + '">' + ICONS.locate + '</button>' +
       (g ? '' : '<button type="button" class="fab primary" id="fab-add" aria-label="' + esc(t('addObjekt')) + '">' + ICONS.plus + '</button>') + '</div>' +
       '<button type="button" class="fab map-full-btn" id="fab-full" aria-label="' + esc(t('fullscreen')) + '">' + ICONS.expand + '</button>' +
+      '<a class="map-wind" id="map-wind" href="#/wetter" hidden></a>' +
       '<div id="map-overlay"></div></div>';
   }
+
+  /** Wind oben rechts: Pfeil zeigt, wohin der Wind zieht (Ende = woher er kommt), dazu Richtung und Stärke. */
+  function drawWind() {
+    var box = document.getElementById('map-wind');
+    var c = Wetter.current();
+    if (!box) return;
+    if (!c || c.wind_direction_10m == null) { box.hidden = true; return; }
+    box.hidden = false;
+    box.setAttribute('aria-label', t('windFrom', { d: Wetter.dirName(c.wind_direction_10m, I18n.lang()) }));
+    box.innerHTML = WetterUI.arrow(c.wind_direction_10m, 26) + '<span><b>' + esc(Wetter.dirName(c.wind_direction_10m, I18n.lang())) + '</b>' +
+      '<small class="num">' + Math.round(c.wind_speed_10m) + ' km/h</small></span>';
+  }
+  Wetter.onChange(function () { if (map) drawWind(); });
 
   /* ---------- Vollbild: Android/Chrome echtes Vollbild, iPhone per CSS (Kopfzeile/Navigation ausgeblendet) ---------- */
   var usedApi = false;
@@ -111,9 +138,15 @@ var Karta = (function () {
       '<a class="btn primary block" target="_blank" rel="noopener" href="https://www.google.com/maps/dir/?api=1&destination=' + l.sastanakLat + ',' + l.sastanakLon + '">' + ICONS.pin + esc(t('gRoute')) + '</a>', null, { noFocus: true });
   }
 
+  // Stehende Symbole (Hochsitz, Leiter, Bock, Fütterung …) sitzen mit den Füßen auf dem Punkt, nicht mit der Mitte —
+  // sonst steht der Hochsitz optisch ein gutes Stück neben der Stelle, an die man ihn gesetzt hat.
+  // Werte = unterster Punkt der Grafik im 24er-Raster der SVG (icons/objekti/); Bild 30 px, 2 px Rand.
+  var FUSS = { kanzel: 21, leiter: 21, drueckjagdbock: 20, bodensitz: 18, fuetterung: 20 };
   function objIcon(o) {
     var cls = 'obj-marker' + (o.stanje === 'uklonjen' ? ' removed' : '') + (o.stanje === 'popravak' || o.stanje === 'neupotrebljivo' ? ' bad' : '');
-    return L.divIcon({ className: '', html: '<div class="' + cls + '" style="position:relative"><img alt="" src="' + (ICONS.objekt[o.art] || ICONS.objekt.kanzel) + '"></div>', iconSize: [34, 34], iconAnchor: [17, 17] });
+    var art = ICONS.objekt[o.art] ? o.art : 'kanzel';
+    var ay = FUSS[art] ? Math.round(2 + FUSS[art] * 30 / 24) : 17;
+    return L.divIcon({ className: '', html: '<div class="' + cls + '" style="position:relative"><img alt="" src="' + ICONS.objekt[art] + '"></div>', iconSize: [34, 34], iconAnchor: [17, ay] });
   }
 
   function drawData(ctx) {
@@ -180,32 +213,49 @@ var Karta = (function () {
       [t('odSklop'), p.sklop], [t('odBonitet'), p.bonitet], [t('odUzgoj'), p.uzgoj], [t('odGodina'), p.godina]].filter(function (x) { return x[1]; });
     UI.openSheet('<h2>' + esc(t('odOdjel') + ' ' + (p.odjel || '') + (p.odsjek ? ' ' + p.odsjek : '')) + '</h2>' +
       '<p class="sheet-sub">' + esc(p.gj || '') + '</p>' +
-      (verj ? '<p><span class="badge warn">' + esc(verj) + '</span></p><p class="hint">' + esc(t('verjHint')) + '</p>' : '') +
+      (verj ? '<p><span class="badge warn">' + esc(verj) + '</span></p>' : '') +
       '<dl class="kv">' + kv.map(function (x) { return '<dt>' + esc(x[0]) + '</dt><dd>' + esc(x[1]) + '</dd>'; }).join('') + '</dl>' +
       '<p class="source">' + esc(t('odSource')) + '</p>', null, { noFocus: true });
   }
 
-  function locate(pan) {
+  /**
+   * Ortung wie bei Navigations-Apps: Knopf antippen → Karte folgt dem Standort (bleibt zentriert).
+   * Verschiebt man die Karte von Hand, hört das Folgen auf (Punkt bleibt sichtbar); erneut antippen → folgt wieder.
+   */
+  var follow = false;
+  function setFollow(on) {
+    follow = on;
+    var f = document.getElementById('fab-locate');
+    if (f) { f.classList.toggle('active', watchId !== null); f.classList.toggle('follow', on); }
+  }
+  function locate() {
     if (!navigator.geolocation) { UI.toast(t('gpsFailed')); return; }
-    if (watchId !== null) { if (pan && meMarker) map.setView(meMarker.getLatLng(), Math.max(map.getZoom(), 15)); return; }
+    if (watchId !== null) {
+      setFollow(true);
+      if (meMarker) map.setView(meMarker.getLatLng(), Math.max(map.getZoom(), 16));
+      return;
+    }
     var first = true;
-    document.getElementById('fab-locate').classList.add('active');
     watchId = navigator.geolocation.watchPosition(function (p) {
+      if (!map) return;
       var ll = [p.coords.latitude, p.coords.longitude];
       if (!meMarker) {
         meMarker = L.marker(ll, { icon: L.divIcon({ className: '', html: '<div class="me-dot"></div>', iconSize: [18, 18], iconAnchor: [9, 9] }), interactive: false, zIndexOffset: 1000 }).addTo(map);
         meCircle = L.circle(ll, { radius: p.coords.accuracy, color: '#2f6fc0', weight: 1, fillOpacity: .08, interactive: false }).addTo(map);
       } else { meMarker.setLatLng(ll); meCircle.setLatLng(ll).setRadius(p.coords.accuracy); }
-      if (first && pan) { map.setView(ll, Math.max(map.getZoom(), 15)); first = false; }
+      if (!follow) return;
+      if (first) { map.setView(ll, Math.max(map.getZoom(), 16), { animate: false }); first = false; }
+      else map.panTo(ll, { animate: true, duration: 0.5 });
     }, function (err) {
       UI.toast(err && err.code === 1 ? t('gpsDenied') : t('gpsFailed'));
       stopLocate();
-    }, { enableHighAccuracy: true, maximumAge: 10000, timeout: 30000 });
+    }, { enableHighAccuracy: true, maximumAge: 0, timeout: 30000 });
+    setFollow(true);
   }
   function stopLocate() {
     if (watchId !== null) navigator.geolocation.clearWatch(watchId);
     watchId = null;
-    var f = document.getElementById('fab-locate'); if (f) f.classList.remove('active');
+    setFollow(false);
   }
 
   /** Platzierungsmodus: Fadenkreuz in der Mitte, Leiste unten. onPlace(latlng). */
@@ -220,10 +270,10 @@ var Karta = (function () {
       '<button type="button" class="btn small primary" data-place>' + esc(t('placeHere')) + '</button></div></div>';
     ov.querySelector('[data-cancel]').onclick = endPlace;
     ov.querySelector('[data-gps]').onclick = async function () {
-      try { var p = await Geo.position(); map.setView([p.lat, p.lon], Math.max(map.getZoom(), 17)); }
+      try { var p = await Geo.precise(); map.setView([p.lat, p.lon], Math.max(map.getZoom(), 17)); UI.toast(t('gpsAcc', { m: p.acc })); }
       catch (e) { UI.toast(e && e.code === 1 ? t('gpsDenied') : t('gpsFailed')); }
     };
-    ov.querySelector('[data-place]').onclick = function () { var c = map.getCenter(); endPlace(); onPlace({ lat: +c.lat.toFixed(6), lon: +c.lng.toFixed(6) }); };
+    ov.querySelector('[data-place]').onclick = function () { var p = punktUnterFadenkreuz(map, ov); endPlace(); onPlace(p); };
   }
   function endPlace() {
     mode = null;
@@ -289,7 +339,10 @@ var Karta = (function () {
         if (k === 'odjeli' && show.odjeli) UI.toast(t('odjeliLegend'), { timeout: 6000 });
       };
     });
-    el.querySelector('#fab-locate').onclick = function () { locate(true); };
+    drawWind();
+    Wetter.refresh();
+    el.querySelector('#fab-locate').onclick = function () { locate(); };
+    map.on('dragstart', function () { if (follow) setFollow(false); });
     el.querySelector('#fab-full').onclick = function () { setFull(!isFull()); };
     var add = el.querySelector('#fab-add');
     if (add) add.onclick = function () { startAdd(); };
@@ -336,7 +389,7 @@ var Karta = (function () {
     if (isFull()) setFull(false);
     stopLocate();
     if (map) { map.remove(); map = null; }
-    layers = {}; meMarker = null; meCircle = null; mode = null; focusMarker = null;
+    layers = {}; meMarker = null; meCircle = null; mode = null; focusMarker = null; follow = false;
   }
 
   App.route('karta', {
@@ -376,9 +429,9 @@ var MapPicker = (function () {
       setTimeout(function () { map.invalidateSize(); }, 50);
       function done(v) { map.remove(); ov.remove(); document.body.classList.remove('picker-open'); resolve(v); }
       ov.querySelector('[data-cancel]').onclick = function () { done(null); };
-      ov.querySelector('[data-ok]').onclick = function () { var c = map.getCenter(); done({ lat: +c.lat.toFixed(6), lon: +c.lng.toFixed(6) }); };
+      ov.querySelector('[data-ok]').onclick = function () { done(punktUnterFadenkreuz(map, ov)); };
       ov.querySelector('[data-gps]').onclick = async function () {
-        try { var p = await Geo.position(); map.setView([p.lat, p.lon], Math.max(map.getZoom(), 17)); }
+        try { var p = await Geo.precise(); map.setView([p.lat, p.lon], Math.max(map.getZoom(), 17)); UI.toast(t('gpsAcc', { m: p.acc })); }
         catch (e) { UI.toast(e && e.code === 1 ? t('gpsDenied') : t('gpsFailed')); }
       };
     });

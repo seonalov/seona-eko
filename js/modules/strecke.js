@@ -3,9 +3,14 @@
  * Stats wird auch von Startseite und Drückjagd genutzt.
  */
 var Stats = (function () {
+  /** Abschüsse dieses Jagdjahres — plus alles, was noch in der Kühlzelle liegt oder kein lesbares Datum hat
+   *  (sonst stünde ein Stück in der Kühlzelle, das in der Strecke fehlt). */
   function inJJ(list) {
-    var jj = Store.jagdjahr();
-    return list.filter(function (r) { return r.datum >= jj.start && r.datum <= jj.end; });
+    var jj = Store.jagdjahr(), cold = Store.coldIds();
+    return list.filter(function (r) {
+      var d = String(r.datum || '');
+      return !/^\d{4}-\d{2}-\d{2}/.test(d) || (d >= jj.start && d <= jj.end) || cold[r.id];
+    });
   }
   function filterLov(list, lok) { return lok && lok !== 'all' ? list.filter(function (r) { return r.lokacija === lok; }) : list; }
 
@@ -99,7 +104,7 @@ var Strecke = (function () {
       var rows = p.rows.map(function (row) {
         var pct = row.soll ? Math.min(100, Math.round(row.ist / row.soll * 100)) : 0;
         var split = (row.sollM != null) ? '<span class="r-sub num">♂ ' + row.istM + '/' + row.sollM + ' · ♀ ' + row.istZ + '/' + row.sollZ + '</span>' : '';
-        return '<tr><td>' + esc(row.klase.map(I18n.klasa).join(' / ')) + split +
+        return '<tr><td>' + esc(I18n.klasaFor(v, row.klase[row.klase.length - 1])) + split +
           '<div class="bar"><span class="' + (row.ist > row.soll ? 'over' : '') + '" style="width:' + pct + '%"></span></div></td>' +
           '<td class="n" style="width:70px"><b class="num">' + row.ist + '</b> / ' + row.soll + '</td></tr>';
       }).join('');
@@ -121,7 +126,7 @@ var Strecke = (function () {
     var kv = [
       [t('lblDatum'), UI.fmtDate(r.datum) + (r.vrijemeOdstrjela ? ' · ' + r.vrijemeOdstrjela : '')], [t('lblLoviste'), r.lokacija], [t('lblMjesto'), r.zona],
       [t('lblVrsta'), I18n.species(r.vrsta)], [t('lblSpol'), r.spol === 'ž' ? t('spolZ') : t('spolM')],
-      [t('klasa'), I18n.klasa(r.dobnaKlasa)],
+      [t('klasa'), I18n.klasaFor(r.vrsta, r.dobnaKlasa)],
       // Geweih (nur wenn erfasst): Enden als Zahl bzw. Schaufelstufe; Bewertung erst nach dem Nachtrag
       [/^\d+$/.test(String(r.rogovlje || '')) ? t('lblVrhovi') : t('lblLopata'), /^\d+$/.test(String(r.rogovlje || '')) ? String(r.rogovlje) : I18n.lopata(r.rogovlje)],
       [t('lblTrofejMasa'), r.trofejMasa !== '' && r.trofejMasa != null ? String(r.trofejMasa).replace('.', ',') : ''], [t('lblCic'), r.trofejCic !== '' && r.trofejCic != null ? String(r.trofejCic).replace('.', ',') : ''],
@@ -197,6 +202,11 @@ var Strecke = (function () {
     }, { noFocus: true });
   }
 
+  /** Menübereich „Strecke": Liste · Plan · Kühlzelle */
+  function tabs(active) {
+    return UI.sectionTabs([['#/odstrjel?tab=popis', t('tabList'), active === 'popis'], ['#/odstrjel?tab=plan', t('tabPlan'), active === 'plan'], ['#/hladnjaca', t('tileCold'), active === 'cold']]);
+  }
+
   App.route('odstrjel', {
     nav: 'odstrjel',
     render: function (ctx) {
@@ -207,18 +217,15 @@ var Strecke = (function () {
       var speciesChips = ['all'].concat(PLAN_SPECIES).concat(['Muflon']).map(function (v) {
         return '<button type="button" class="chip" data-vrsta="' + esc(v) + '" aria-pressed="' + (state.vrsta === v) + '">' + esc(v === 'all' ? t('allSpecies') : I18n.species(v)) + '</button>';
       }).join('');
-      return '<div class="page-head"><div class="eyebrow">' + esc(t('huntYear')) + ' ' + esc(jj.label) + '</div>' +
+      return tabs(state.tab) + '<div class="page-head"><div class="eyebrow">' + esc(t('huntYear')) + ' ' + esc(jj.label) + '</div>' +
         '<h1>' + esc(t('streckeTitle', { n: s.list.length })) + '</h1>' +
         '<p>' + esc(t('streckeSub', { ist: s.ist, soll: s.soll })) + (s.pending ? ' · ' + esc(t('pendingN', { n: s.pending })) : '') + '</p></div>' +
         '<a class="btn primary block" href="#/odstrjel/novi" style="margin-bottom:14px">' + ICONS.plus + esc(t('newOdstrjel')) + '</a>' +
-        '<div class="seg" id="tab-seg" style="margin-bottom:12px"><button type="button" data-tab="popis" aria-pressed="' + (state.tab === 'popis') + '">' + esc(t('tabList')) + '</button>' +
-        '<button type="button" data-tab="plan" aria-pressed="' + (state.tab === 'plan') + '">' + esc(t('tabPlan')) + '</button></div>' +
         lovChips() +
         (state.tab === 'popis' ? '<div class="chips" id="vrsta-chips" style="margin:6px 0 10px">' + speciesChips + '</div>' + renderList(s.list) : '<div style="margin-top:8px" class="stack">' + renderPlan() + '</div>');
     },
     mount: function (el, ctx) {
       if (ctx.params[0] === 'novi' || ctx.params[0] === 'uredi') return Odstrjel.mount(el, ctx);
-      UI.$$('#tab-seg button', el).forEach(function (b) { b.onclick = function () { state.tab = b.getAttribute('data-tab'); App.render(true); }; });
       UI.$$('#lok-chips .chip', el).forEach(function (b) { b.onclick = function () { state.lok = b.getAttribute('data-lok'); App.render(true); }; });
       UI.$$('#vrsta-chips .chip', el).forEach(function (b) { b.onclick = function () { state.vrsta = b.getAttribute('data-vrsta'); App.render(true); }; });
       UI.$$('.row[data-id]', el).forEach(function (b) { b.onclick = function () { openDetail(b.getAttribute('data-id')); }; });
@@ -227,5 +234,5 @@ var Strecke = (function () {
     onData: function () { if (window.Odstrjel && Odstrjel.onData) Odstrjel.onData(); }
   });
 
-  return { openDetail: openDetail, title: title, shortLov: shortLov, rowHtml: rowHtml };
+  return { openDetail: openDetail, title: title, shortLov: shortLov, rowHtml: rowHtml, tabs: tabs };
 })();

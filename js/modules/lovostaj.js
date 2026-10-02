@@ -47,7 +47,7 @@
       }).join('');
 
       return '<div class="page-head"><div class="eyebrow">' + esc(UI.fmtLong(new Date())) + '</div>' +
-        '<h1>' + esc(t('lovostajTitle', { n: openN })) + '</h1><p>' + esc(t('lovostajSub')) + '</p></div>' +
+        '<h1>' + esc(t('lovostajTitle', { n: openN })) + '</h1></div>' +
         '<div class="panel flush open-list"><ul class="list">' + ordered.map(function (x) {
           return '<li><div class="row' + (x.open ? '' : ' closed') + '"><span class="r-icon">' + ICONS.forSpecies(x.g.vrsta) + '</span>' +
             '<span class="r-main"><span class="r-title">' + esc(t(x.r.key)) + '</span><span class="r-sub">' + esc(t(x.g.key)) + (x.r.note ? ' · ' + esc(t('withLimits')) : '') + '</span></span>' +

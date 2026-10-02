@@ -7,6 +7,7 @@
  *
  * Fehlerarten (err.kind):
  *  - 'network':   kein Netz / Zeitüberschreitung → Änderung bleibt in der Outbox, später erneut
+ *  - 'busy':      Server gerade beschäftigt → wie Netzfehler, später erneut
  *  - 'auth':      falscher Code → Nutzer muss den Code ändern
  *  - 'forbidden': Rolle reicht nicht (Jäger-Code für Verwaltungsaktion)
  *  - 'config':    API_URL nicht eingetragen
@@ -47,6 +48,7 @@ var API = (function () {
         throw ApiError('server', 'Neočekivan odgovor poslužitelja.');
       }
       if (data && data.ok === false) {
+        if (data.busy) throw ApiError('busy', data.error); // Sperre belegt (mehrere Handys gleichzeitig) → später erneut
         var kind = data.errorKind === 'auth' ? 'auth' : data.errorKind === 'forbidden' ? 'forbidden' : 'server';
         throw ApiError(kind, data.error);
       }

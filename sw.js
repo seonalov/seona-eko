@@ -1,14 +1,14 @@
 /**
  * Service Worker: hält die App offline verfügbar.
  *  - App-Shell (Dateien unten) wird beim Installieren gecacht, cache-first.
- *  - Kartenkacheln und Kartendaten: eigener Cache (seona-karta-v1), gefüllt über
+ *  - Kartenkacheln und Kartendaten: eigener Cache (seona-karta-v2), gefüllt über
  *    „Karte offline speichern" oder beim Anschauen; cache-first.
  *  - Aufrufe der Apps-Script-API (andere Domain, POST) werden nie gecacht.
  * Bei jeder Änderung an App-Dateien CACHE_VERSION hochzählen — sonst sehen installierte Handys
  * die neue Version nicht. Die App zeigt dann „Dostupna je nova verzija — Osvježi".
  */
-var CACHE_VERSION = 'seona-v10';
-var MAP_CACHE = 'seona-karta-v1';
+var CACHE_VERSION = 'seona-v22';
+var MAP_CACHE = 'seona-karta-v2';
 var SHELL = [
   './', 'index.html', 'styles.css', 'config.js', 'manifest.webmanifest',
   'vendor/leaflet/leaflet.js', 'vendor/leaflet/leaflet.css', 'vendor/qrcode/qrcode.min.js',
@@ -21,7 +21,7 @@ var SHELL = [
   'icons/icon-192.png', 'icons/icon-512.png', 'icons/icon-maskable-512.png', 'icons/apple-touch-icon.png',
   'icons/objekti/hochsitz_kanzel.svg', 'icons/objekti/hochsitz_leiter.svg', 'icons/objekti/drueckjagdbock.svg', 'icons/objekti/bodensitz.svg',
   'icons/objekti/kirrung.svg', 'icons/objekti/salzlecke.svg', 'icons/objekti/suhle.svg', 'icons/objekti/fuetterung.svg',
-  'icons/objekti/schranke.svg', 'icons/objekti/kamera.svg'
+  'icons/objekti/schranke.svg', 'icons/objekti/kamera.svg', 'icons/objekti/zentrale.svg', 'icons/objekti/jagdhuette.svg'
 ];
 
 self.addEventListener('install', function (event) {
