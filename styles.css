@@ -65,7 +65,9 @@
 }
 
 *{box-sizing:border-box;}
-html,body{margin:0;padding:0;height:100%;overflow:hidden;}
+/* Kein overflow:hidden hier: iOS würde sonst alles unterhalb seiner (zu kurz gemeldeten) Höhe abschneiden.
+   Die Seite scrollt trotzdem nicht — alles liegt in der fest verankerten .app. */
+html,body{margin:0;padding:0;height:100%;overscroll-behavior:none;}
 body{
   background:var(--cream);
   color:var(--ink);
