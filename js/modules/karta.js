@@ -110,10 +110,13 @@ var Karta = (function () {
     if (!c || c.wind_direction_10m == null) { box.hidden = true; return; }
     box.hidden = false;
     box.setAttribute('aria-label', t('windFrom', { d: Wetter.dirName(c.wind_direction_10m, I18n.lang()) }));
-    box.innerHTML = '<svg class="wind-compass" viewBox="0 0 48 48" aria-hidden="true"><circle cx="24" cy="24" r="22" class="wc-ring"/>' +
-      '<g class="wc-rose"><path d="M24 2.5l3.2 6h-6.4z" class="wc-n"/><text x="24" y="17.5" class="wc-nt">N</text></g>' +
-      '<g class="wc-arrow"><path d="M24 14v22"/><path d="M18.5 30.5l5.5 5.5 5.5-5.5"/></g></svg>' +
-      '<span><b>' + esc(Wetter.dirName(c.wind_direction_10m, I18n.lang())) + '</b><small class="num">' + Math.round(c.wind_speed_10m) + ' km/h</small></span>';
+    // Zifferblatt: Striche alle 30°, Kupfer-Dreieck = Norden, schlanke Nadel = Wind (Spitze zeigt, wohin er zieht)
+    var striche = '';
+    for (var d = 0; d < 360; d += 30) striche += '<path d="M24 ' + (d % 90 ? '3.6v2' : '3v3.4') + '" transform="rotate(' + d + ' 24 24)" class="' + (d % 90 ? 'wc-t' : 'wc-T') + '"/>';
+    box.innerHTML = '<svg class="wind-compass" viewBox="0 0 48 48" aria-hidden="true"><circle cx="24" cy="24" r="22.5" class="wc-ring"/>' +
+      '<g class="wc-rose">' + striche + '<path d="M24 1.2l2.4 4.2h-4.8z" class="wc-n"/></g>' +
+      '<g class="wc-arrow"><circle cx="24" cy="11.5" r="1.6"/><path d="M24 13v19" class="wc-shaft"/><path d="M24 37.5l-3.4-6.6h6.8z"/></g></svg>' +
+      '<span class="wc-label"><b>' + esc(Wetter.dirName(c.wind_direction_10m, I18n.lang())) + '</b> <span class="num">' + Math.round(c.wind_speed_10m) + '</span><small> km/h</small></span>';
     updateCompass();
   }
   function updateCompass() {
