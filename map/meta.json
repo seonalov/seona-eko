@@ -27,5 +27,16 @@
  "maxNativeZoom": 16,
  "tiles": 1163,
  "quelle": "QField-Feldkarte Loviste_GMOT_Feldkarte.qgs (70_Karten/80_Fachlayer/90_QField), gerendert mit QGIS",
- "gebaut": "2026-10-02"
+ "gebaut": "2026-10-02",
+ "rahmen": [
+  [
+   45.40888,
+   17.87759
+  ],
+  [
+   45.4957,
+   18.03577
+  ]
+ ],
+ "rahmenHinweis": "Gerades Rechteck (Nord oben) im Kartenbild; das QField-Bild ist in HTRS96/TM zugeschnitten und daher in der App um ~1° gedreht. Außerhalb deckt die App mit Papierfarbe ab (karta.js: rahmenMaske)."
 }

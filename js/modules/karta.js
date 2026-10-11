@@ -55,6 +55,22 @@ function punktUnterFadenkreuz(map, root) {
   return { lat: +c.lat.toFixed(6), lon: +c.lng.toFixed(6) };
 }
 
+/**
+ * Das Kartenbild ist in HTRS96/TM (EPSG:3765) rechteckig zugeschnitten; in Web-Mercator (Nord oben) steht dieses Rechteck
+ * im Osten Kroatiens um gut 1° schräg (Meridiankonvergenz). Damit der Rand gerade ist, deckt eine Fläche in Papierfarbe
+ * alles außerhalb des größten geraden Rechtecks im Bild ab (meta.rahmen, ermittelt aus den Kacheln).
+ */
+function rahmenMaske(map, meta) {
+  if (!meta.rahmen) return;
+  var s = meta.rahmen[0][0], w = meta.rahmen[0][1], n = meta.rahmen[1][0], e = meta.rahmen[1][1];
+  // eigene Ebene direkt über den Kacheln, unter Reviergrenzen und Symbolen
+  var pane = map.createPane('rahmen');
+  pane.style.zIndex = 250; pane.style.pointerEvents = 'none';
+  L.polygon([[[35, 5], [55, 5], [55, 30], [35, 30]], [[s, w], [n, w], [n, e], [s, e]]], {
+    stroke: false, fillColor: '#efe9d8', fillOpacity: 1, interactive: false, pane: 'rahmen'
+  }).addTo(map);
+}
+
 var Karta = (function () {
   var esc = UI.esc, t = I18n.t;
   var map = null, layers = {}, watchId = null, meMarker = null, meCircle = null, mode = null, focusMarker = null;
@@ -307,6 +323,7 @@ var Karta = (function () {
     catch (e) { el.querySelector('#map').innerHTML = UI.emptyState('map', t('mapDataMissing'), t('mapDataMissingText')); return; }
     if (!document.getElementById('map')) return; // inzwischen weiter navigiert
     map = L.map('map', { zoomControl: false, attributionControl: true, minZoom: meta.minZoom, maxZoom: 18, maxBounds: L.latLngBounds(meta.bounds).pad(0.15), preferCanvas: true });
+    rahmenMaske(map, meta);
     L.tileLayer(MapOffline.prefix() + '/{z}/{x}/{y}.jpg', {
       minZoom: meta.minZoom, maxZoom: 18, maxNativeZoom: meta.maxNativeZoom, bounds: meta.bounds,
       attribution: 'Seona Eko · QField-karta (DGU, OSM, HŠ)'
@@ -423,6 +440,7 @@ var MapPicker = (function () {
       document.body.classList.add('picker-open');
       var map = L.map('picker-map', { zoomControl: false, minZoom: meta.minZoom, maxZoom: 18, maxBounds: L.latLngBounds(meta.bounds).pad(0.15), attributionControl: false });
       L.tileLayer(MapOffline.prefix() + '/{z}/{x}/{y}.jpg', { minZoom: meta.minZoom, maxZoom: 18, maxNativeZoom: meta.maxNativeZoom, bounds: meta.bounds }).addTo(map);
+      rahmenMaske(map, meta);
       L.control.zoom({ position: 'topright' }).addTo(map);
       // Hochsitze & Co. zur Orientierung (nicht antippbar — getippt wird nur mit dem Fadenkreuz)
       if (!App.isGost()) Store.objekti().forEach(function (o) {
