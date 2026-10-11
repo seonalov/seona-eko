@@ -148,11 +148,25 @@ var App = (function () {
     setupLangButtons();
     I18n.apply(el);
     el.classList.add('show');
-    setTimeout(function () { document.getElementById('setup-code').focus(); }, 60);
+    // Beim ersten Start keine Tastatur aufklappen — meist wird der QR-Code gescannt
+    if (!first) setTimeout(function () { document.getElementById('setup-code').focus(); }, 60);
   }
   function closeSetup() { document.getElementById('setup').classList.remove('show'); }
 
   document.getElementById('setup-cancel').onclick = closeSetup;
+  // QR in der App scannen: Code (und Sprache) übernehmen und gleich prüfen — nichts tippen
+  document.getElementById('setup-scan').onclick = async function () {
+    var err = document.getElementById('setup-error');
+    err.hidden = true;
+    var text = await QrScan.open();
+    if (!text) return;
+    var q = QrScan.parseStart(text);
+    if (!q) { err.textContent = I18n.t('scanForeign'); err.hidden = false; return; }
+    if (q.l) { setLang(q.l); setupLangButtons(); }
+    await DB.set('gostId', q.r === 'uprava' ? '' : (q.g || ''));
+    document.getElementById('setup-code').value = q.c;
+    document.getElementById('setup-form').requestSubmit();
+  };
   document.getElementById('setup-form').addEventListener('submit', async function (ev) {
     ev.preventDefault();
     var err = document.getElementById('setup-error');
@@ -356,6 +370,7 @@ var App = (function () {
     if (/iPhone|iPad|iPod/i.test(ua) || (/Macintosh/.test(ua) && navigator.maxTouchPoints > 1)) document.documentElement.classList.add('ios');
     await handleStartLink();
     I18n.apply(document);
+    injectIcons(document.getElementById('setup'));
     injectIcons(document.getElementById('bottomnav'));
     document.getElementById('sync-pill').onclick = function () { go('#/vise?sync=1'); };
     window.addEventListener('hashchange', function () { render(); });

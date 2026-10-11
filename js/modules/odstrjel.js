@@ -72,7 +72,7 @@ var Odstrjel = (function () {
       '</div>' +
 
       (edit ? '' : '<div class="panel" id="cold-panel"><label style="display:flex;gap:12px;align-items:center;font-weight:600;cursor:pointer;min-height:44px"><input type="checkbox" id="cold" checked style="width:22px;height:22px">' +
-        '<span>' + esc(t('coldCheck')) + '<span class="hint" style="display:block;font-weight:400;margin:0">' + esc(t('coldHint')) + '</span></span></label>' +
+        '<span>' + esc(t('coldCheck')) + '</span></label>' +
         '<div class="field" id="asp-wrap" style="margin-top:12px" hidden><label class="field-label" for="aspUzorak">' + esc(t('lblAspUzorak')) + '</label><input type="text" id="aspUzorak" placeholder="' + esc(t('phAspUzorak')) + '"></div></div>') +
 
       // Drückjagd-Strecke wird auf der Drückjagdseite erfasst — hier nur Jagdart und Foto

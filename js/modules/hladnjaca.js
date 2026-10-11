@@ -83,7 +83,7 @@
   function renderZelle(D) {
     var old = D.inCold.filter(function (w) { return days(w.hladnjacaOd) >= 7; }).length;
     var pos = D.inCold.filter(function (w) { return w.aspNalaz === 'pozitivan'; }).length;
-    return (pos ? '<div class="panel alert-panel"><b>' + esc(t('aspPositiveTitle')) + '</b><p class="hint">' + esc(t('aspPositiveText')) + '</p></div>' : '') +
+    return (pos ? '<div class="panel alert-panel"><b>' + esc(t('aspPositiveTitle')) + '</b></div>' : '') +
       (old ? '<div class="panel alert-panel soft"><b>' + esc(t('coldOld', { n: old })) + '</b></div>' : '') +
       (D.inCold.length ? '<div class="panel flush"><ul class="list">' + D.inCold.map(function (w) { return rowCold(w, D.byId[w.id]); }).join('') + '</ul></div>'
         : '<div class="panel">' + UI.emptyState('cold', t('coldEmpty'), t('coldEmptyText')) + '</div>') +
@@ -207,14 +207,12 @@
           '<span class="seg" data-res="' + esc(id) + '" style="flex:none"><button type="button" data-v="negativan" aria-pressed="true">' + esc(I18n.nalaz('negativan')) + '</button>' +
           '<button type="button" data-v="pozitivan" aria-pressed="false">' + esc(I18n.nalaz('pozitivan')) + '</button></span></div></li>';
       }).join('') + '</ul></div>' +
-      '<p class="error-msg" id="pos-warn" hidden>' + esc(t('aspPositiveText')) + '</p>' +
       '<button type="submit" class="btn primary block">' + esc(t('btnSave')) + '</button></form>', function (el, api) {
       UI.$$('[data-res]', el).forEach(function (s) {
         UI.$$('button', s).forEach(function (b) {
           b.onclick = function () {
             st[s.getAttribute('data-res')] = b.getAttribute('data-v');
             UI.$$('button', s).forEach(function (x) { x.setAttribute('aria-pressed', String(x === b)); });
-            el.querySelector('#pos-warn').hidden = !Object.keys(st).some(function (k) { return st[k] === 'pozitivan'; });
           };
         });
       });

@@ -34,7 +34,6 @@ var Tutorial = (function () {
     ['#/lovovi', '#new-lov', 'lovNew'],
     ['#/lovovi', '.list a.row', 'lovOpen'],
     ['#/gosti', '#new-gost', 'gostNew'],
-    ['#/gosti', '#new-code', 'gostCode'],
     ['#/vise', '#bottomnav [data-nav="vise"]', 'vise'],
     ['#/vise', '#map-dl', 'viseMap'],
     ['#/vise', '#team-qr', 'viseTeam'],

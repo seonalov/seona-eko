@@ -46,17 +46,17 @@
       <path d="M24 40 V21"/><path d="M24 21c-4 0-7-4-10-12"/><path d="M24 21c-7-2-12-8-16-14"/><path d="M24 21c4 0 7-4 10-12"/><path d="M24 21c7-2 12-8 16-14"/>
     </svg>
     <h2 id="setup-title">Seona Eko</h2>
-    <p data-i18n="setupText">Upišite kod koji ste dobili od stručne osobe.</p>
-    <p class="hint" data-i18n="setupQrHint" style="margin-top:-4px">Imate QR kod? Skenirajte ga kamerom mobitela.</p>
-    <div class="field">
-      <span class="field-label" data-i18n="lblLang">Jezik</span>
-      <div class="seg" id="setup-lang">
-        <button type="button" data-lang="hr">HR</button><button type="button" data-lang="en">EN</button><button type="button" data-lang="de">DE</button>
-      </div>
+    <p class="setup-welcome" data-i18n="setupWelcome">Dobro došli u revir.</p>
+    <p data-i18n="setupText">Skenirajte svoj QR kod ili upišite kod.</p>
+    <div class="seg setup-lang" id="setup-lang" aria-label="Jezik">
+      <button type="button" data-lang="hr">HR</button><button type="button" data-lang="en">EN</button><button type="button" data-lang="de">DE</button>
     </div>
+    <button type="button" class="btn block scan-btn" id="setup-scan"><span data-icon="qr"></span><span data-i18n="btnScanQr">Skeniraj QR kod</span></button>
+    <div class="or-line"><span data-i18n="setupOr">ili upišite kod</span></div>
     <div class="field">
       <label class="field-label req" for="setup-code" data-i18n="lblCode">Kod</label>
       <input type="password" id="setup-code" autocapitalize="off" autocorrect="off" spellcheck="false">
+      <p class="hint setup-hint" data-i18n="setupQrHint">Kod stoji i ispod QR koda.</p>
     </div>
     <div class="field">
       <label class="field-label" for="setup-device" data-i18n="lblDevice">Vaše ime / uređaj</label>
@@ -97,6 +97,7 @@
 <script src="js/core/ui.js"></script>
 <script src="js/core/geo.js"></script>
 <script src="js/core/wetter.js"></script>
+<script src="js/core/qrscan.js"></script>
 <script src="js/core/app.js"></script>
 <script src="js/modules/home.js"></script>
 <script src="js/modules/odstrjel.js"></script>

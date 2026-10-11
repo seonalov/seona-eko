@@ -403,6 +403,7 @@ details.more[open] summary::before{content:"–";}
 .plan-table th.n,.plan-table td.n{text-align:right;font-variant-numeric:tabular-nums;}
 .plan-table td{padding:9px 0;border-top:1px solid var(--line);}
 .plan-table td .bar{margin-top:5px;}
+.plan-table .r-sub{display:block;font-size:.8rem;color:var(--ink-soft);margin-top:2px;}
 .plan-table tr.sum td{font-weight:700;}
 
 .legal{font-size:.75rem;color:var(--ink-soft);line-height:1.45;}
@@ -538,6 +539,8 @@ body.picker-open{overflow:hidden;}
 .warn-text{color:var(--warn);font-weight:600;font-size:.85rem;}
 .code-big{font-family:var(--font-display);font-size:1.5rem;letter-spacing:.08em;text-align:center;margin:0;user-select:all;}
 .code-inline{font-family:var(--font-display);letter-spacing:.06em;user-select:all;}
+.guest-code{text-align:center;margin:6px 0 2px;font-size:.95rem;}
+.guest-code b{font-family:var(--font-display);font-size:1.6rem;letter-spacing:.14em;margin-left:6px;user-select:all;}
 
 /* Einführung für das Team: Karte über der unteren Navigation, passender Menüpunkt hervorgehoben */
 .tut-scrim{position:fixed;inset:0;z-index:92;background:transparent;}
@@ -558,3 +561,19 @@ body.picker-open{overflow:hidden;}
 @media (prefers-reduced-motion:reduce){.tut-hole{transition:none;}}
 
 .species-grid.four{grid-template-columns:repeat(4,1fr);}
+
+/* Anmeldung: Willkommen, QR scannen, „oder Code eingeben" */
+.overlay p.setup-welcome{font-family:var(--font-display);font-size:1.15rem;color:var(--accent-ink);margin:-2px 0 4px;letter-spacing:.02em;}
+.overlay .setup-lang{max-width:200px;margin:0 auto 18px;}
+.overlay .scan-btn{min-height:56px;font-size:1.05rem;gap:10px;background:#f7f5ee;color:#2b322e;border-color:#f7f5ee;}
+.overlay .scan-btn svg{width:26px;height:26px;}
+.overlay .or-line{display:flex;align-items:center;gap:10px;margin:18px 0 6px;color:var(--sage);font-size:.8rem;}
+.overlay .or-line::before,.overlay .or-line::after{content:"";flex:1;height:1px;background:rgba(255,255,255,.2);}
+.overlay p.setup-hint{text-align:left;margin:6px 0 0;font-size:.78rem;}
+
+/* QR-Scanner (Vollbild-Kamera) */
+.scan{position:fixed;inset:0;z-index:95;background:#000;display:flex;flex-direction:column;}
+.scan video{flex:1;width:100%;min-height:0;object-fit:cover;}
+.scan-frame{position:absolute;left:50%;top:42%;width:min(64vw,260px);aspect-ratio:1;transform:translate(-50%,-50%);border:3px solid rgba(255,255,255,.9);border-radius:18px;box-shadow:0 0 0 100vmax rgba(0,0,0,.35);pointer-events:none;}
+.scan-bar{padding:16px 20px calc(16px + env(safe-area-inset-bottom));background:var(--forest-1);color:var(--accent-ink);}
+.scan-bar p{margin:0 0 12px;text-align:center;color:var(--sage);}

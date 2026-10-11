@@ -398,7 +398,7 @@ var Karta = (function () {
     onData: function () { if (map && mode !== 'place') drawData({ query: {} }); }
   });
 
-  return { startMove: startMove, isOpen: function () { return !!map; } };
+  return { startMove: startMove, isOpen: function () { return !!map; }, objIcon: objIcon };
 })();
 
 /**
@@ -424,6 +424,11 @@ var MapPicker = (function () {
       var map = L.map('picker-map', { zoomControl: false, minZoom: meta.minZoom, maxZoom: 18, maxBounds: L.latLngBounds(meta.bounds).pad(0.15), attributionControl: false });
       L.tileLayer(MapOffline.prefix() + '/{z}/{x}/{y}.jpg', { minZoom: meta.minZoom, maxZoom: 18, maxNativeZoom: meta.maxNativeZoom, bounds: meta.bounds }).addTo(map);
       L.control.zoom({ position: 'topright' }).addTo(map);
+      // Hochsitze & Co. zur Orientierung (nicht antippbar — getippt wird nur mit dem Fadenkreuz)
+      if (!App.isGost()) Store.objekti().forEach(function (o) {
+        if (o.stanje === 'uklonjen' || !(Number(o.lat) && Number(o.lon))) return;
+        L.marker([o.lat, o.lon], { icon: Karta.objIcon(o), interactive: false, keyboard: false }).addTo(map);
+      });
       if (start && Number(start.lat) && Number(start.lon)) map.setView([start.lat, start.lon], 16);
       else map.fitBounds(meta.reviere, { padding: [20, 20] });
       setTimeout(function () { map.invalidateSize(); }, 50);
