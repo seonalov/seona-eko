@@ -587,3 +587,16 @@ body.picker-open{overflow:hidden;}
 .klasa-group label span{display:block;line-height:1.25;hyphens:auto;-webkit-hyphens:auto;overflow-wrap:break-word;min-width:0;}
 .klasa-group small{display:block;font-weight:500;font-size:.72rem;opacity:.75;margin-top:2px;}
 .klasa-2{margin-top:12px;}
+
+/* Standort mit Blickrichtung (Kegel dreht mit dem Handy) */
+.me-wrap{position:relative;width:72px;height:72px;}
+.me-wrap .me-dot{position:absolute;left:27px;top:27px;}
+.me-cone{position:absolute;inset:0;border-radius:50%;background:conic-gradient(from -32deg,rgba(47,111,192,.55) 0deg 64deg,transparent 64deg);
+  -webkit-mask:radial-gradient(circle,#000 18%,rgba(0,0,0,.6) 45%,transparent 70%);mask:radial-gradient(circle,#000 18%,rgba(0,0,0,.6) 45%,transparent 70%);}
+/* Wind-Kompass oben rechts */
+.wind-compass{width:40px;height:40px;flex:none;}
+.wind-compass .wc-ring{fill:none;stroke:var(--line);stroke-width:1.5;}
+.wind-compass .wc-n{fill:#b5442f;}
+.wind-compass .wc-nt{font:700 8px/1 var(--font-body,system-ui);fill:var(--ink-soft);text-anchor:middle;}
+.wind-compass .wc-arrow{fill:none;stroke:var(--ink);stroke-width:2.6;stroke-linecap:round;stroke-linejoin:round;}
+.map-wind.turning .wc-ring{stroke:#2f6fc0;}

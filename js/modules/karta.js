@@ -98,7 +98,11 @@ var Karta = (function () {
       '<div id="map-overlay"></div></div>';
   }
 
-  /** Wind oben rechts: Pfeil zeigt, wohin der Wind zieht (Ende = woher er kommt), dazu Richtung und Stärke. */
+  /**
+   * Wind oben rechts als kleiner Kompass: Pfeil zeigt, wohin der Wind zieht (Ende = woher er kommt). Ist die Blickrichtung
+   * bekannt (nach „Mein Standort“), dreht sich die Windrose mit dem Handy — der Pfeil zeigt dann den Wind relativ zur
+   * Blickrichtung (oben = geradeaus), „N“ zeigt nach Norden.
+   */
   function drawWind() {
     var box = document.getElementById('map-wind');
     var c = Wetter.current();
@@ -106,8 +110,58 @@ var Karta = (function () {
     if (!c || c.wind_direction_10m == null) { box.hidden = true; return; }
     box.hidden = false;
     box.setAttribute('aria-label', t('windFrom', { d: Wetter.dirName(c.wind_direction_10m, I18n.lang()) }));
-    box.innerHTML = WetterUI.arrow(c.wind_direction_10m, 26) + '<span><b>' + esc(Wetter.dirName(c.wind_direction_10m, I18n.lang())) + '</b>' +
-      '<small class="num">' + Math.round(c.wind_speed_10m) + ' km/h</small></span>';
+    box.innerHTML = '<svg class="wind-compass" viewBox="0 0 48 48" aria-hidden="true"><circle cx="24" cy="24" r="22" class="wc-ring"/>' +
+      '<g class="wc-rose"><path d="M24 2.5l3.2 6h-6.4z" class="wc-n"/><text x="24" y="17.5" class="wc-nt">N</text></g>' +
+      '<g class="wc-arrow"><path d="M24 14v22"/><path d="M18.5 30.5l5.5 5.5 5.5-5.5"/></g></svg>' +
+      '<span><b>' + esc(Wetter.dirName(c.wind_direction_10m, I18n.lang())) + '</b><small class="num">' + Math.round(c.wind_speed_10m) + ' km/h</small></span>';
+    updateCompass();
+  }
+  function updateCompass() {
+    var box = document.getElementById('map-wind'), c = Wetter.current();
+    if (!box || !c || c.wind_direction_10m == null) return;
+    var h = heading == null ? 0 : heading;
+    var rose = box.querySelector('.wc-rose'), arr = box.querySelector('.wc-arrow');
+    if (rose) rose.setAttribute('transform', 'rotate(' + (-h).toFixed(1) + ' 24 24)');
+    if (arr) arr.setAttribute('transform', 'rotate(' + (c.wind_direction_10m - h).toFixed(1) + ' 24 24)');
+    box.classList.toggle('turning', heading != null);
+  }
+
+  /* ---------- Blickrichtung: Kegel am Standortpunkt und mitdrehender Wind-Kompass ---------- */
+  // Missweisung in Slawonien 2026 ≈ 5° Ost; das iPhone liefert die magnetische Richtung (webkitCompassHeading)
+  var DEKLINATION = 5;
+  var heading = null, headingOn = false, headingRaf = false;
+  function onOrient(e) {
+    var h = null;
+    if (typeof e.webkitCompassHeading === 'number' && !isNaN(e.webkitCompassHeading)) h = e.webkitCompassHeading + DEKLINATION;
+    else if (e.absolute && e.alpha != null) h = 360 - e.alpha;
+    if (h == null) return;
+    var scr = (screen.orientation && screen.orientation.angle) || window.orientation || 0;
+    h = ((h + scr) % 360 + 360) % 360;
+    // sanft nachführen (auch über 0°/360° hinweg), damit Kegel und Rose nicht zittern
+    if (heading == null) heading = h;
+    else { var d = ((h - heading + 540) % 360) - 180; heading = (heading + d * 0.3 + 360) % 360; }
+    if (!headingRaf) { headingRaf = true; requestAnimationFrame(function () { headingRaf = false; applyHeading(); }); }
+  }
+  /** Muss direkt aus einem Fingertipp kommen (iPhone fragt einmal nach Erlaubnis für Bewegung & Ausrichtung). */
+  function startHeading() {
+    if (headingOn || !window.DeviceOrientationEvent) return;
+    var go = function () {
+      headingOn = true;
+      window.addEventListener('ondeviceorientationabsolute' in window ? 'deviceorientationabsolute' : 'deviceorientation', onOrient);
+    };
+    if (typeof DeviceOrientationEvent.requestPermission === 'function') {
+      DeviceOrientationEvent.requestPermission().then(function (s) { if (s === 'granted') go(); }).catch(function () {});
+    } else go();
+  }
+  function stopHeading() {
+    window.removeEventListener('deviceorientationabsolute', onOrient);
+    window.removeEventListener('deviceorientation', onOrient);
+    headingOn = false; heading = null;
+  }
+  function applyHeading() {
+    var cone = document.querySelector('.me-cone');
+    if (cone) { cone.style.display = heading == null ? 'none' : ''; if (heading != null) cone.style.transform = 'rotate(' + heading.toFixed(1) + 'deg)'; }
+    updateCompass();
   }
   Wetter.onChange(function () { if (map) drawWind(); });
 
@@ -245,6 +299,7 @@ var Karta = (function () {
     if (f) { f.classList.toggle('active', watchId !== null); f.classList.toggle('follow', on); }
   }
   function locate() {
+    startHeading();
     if (!navigator.geolocation) { UI.toast(t('gpsFailed')); return; }
     if (watchId !== null) {
       setFollow(true);
@@ -256,7 +311,8 @@ var Karta = (function () {
       if (!map) return;
       var ll = [p.coords.latitude, p.coords.longitude];
       if (!meMarker) {
-        meMarker = L.marker(ll, { icon: L.divIcon({ className: '', html: '<div class="me-dot"></div>', iconSize: [18, 18], iconAnchor: [9, 9] }), interactive: false, zIndexOffset: 1000 }).addTo(map);
+        meMarker = L.marker(ll, { icon: L.divIcon({ className: '', html: '<div class="me-wrap"><div class="me-cone" style="display:none"></div><div class="me-dot"></div></div>', iconSize: [72, 72], iconAnchor: [36, 36] }), interactive: false, zIndexOffset: 1000 }).addTo(map);
+        applyHeading();
         meCircle = L.circle(ll, { radius: p.coords.accuracy, color: '#2f6fc0', weight: 1, fillOpacity: .08, interactive: false }).addTo(map);
       } else { meMarker.setLatLng(ll); meCircle.setLatLng(ll).setRadius(p.coords.accuracy); }
       if (!follow) return;
@@ -405,6 +461,7 @@ var Karta = (function () {
   function unmount() {
     if (isFull()) setFull(false);
     stopLocate();
+    stopHeading();
     if (map) { map.remove(); map = null; }
     layers = {}; meMarker = null; meCircle = null; mode = null; focusMarker = null; follow = false;
   }
