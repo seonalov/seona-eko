@@ -91,6 +91,8 @@ var Odstrjel = (function () {
     if (spol && KATEGORIJA[vrsta]) { var n = kategorija(vrsta, spol, v, I18n.lang()); return n.charAt(0).toUpperCase() + n.slice(1); }
     return v === 'Tele/prase' ? I18n.klasaTele(vrsta) : I18n.klasaPomladak(vrsta);
   }
+  /** „Schmalspießer / Schmaltier“ → zwei Zeilen (passt in den schmalen Knopf). */
+  function stufe1Html(vrsta, spol, v) { return stufe1Label(vrsta, spol, v).split(' / ').map(esc).join('<br>'); }
   function stufe2Label(vrsta, v) {
     return '<b>' + esc(I18n.klasaStufe2(v)) + '</b><small>' + esc(I18n.godine(vrsta, v)) + '</small>';
   }
@@ -99,7 +101,7 @@ var Odstrjel = (function () {
     var s1 = STUFE2.indexOf(value) !== -1 ? 'starije' : value || '', s2 = STUFE2.indexOf(value) !== -1 ? value : '';
     return '<div class="klasa-pick" data-klasa-pick="' + esc(name) + '"><div class="radio-group klasa-group three">' +
       STUFE1.map(function (k) {
-        return '<label><input type="radio" name="' + esc(name) + '-1" value="' + k + '"' + (s1 === k ? ' checked' : '') + '><span data-k1="' + k + '">' + esc(stufe1Label(vrsta, spol, k)) + '</span></label>';
+        return '<label><input type="radio" name="' + esc(name) + '-1" value="' + k + '"' + (s1 === k ? ' checked' : '') + '><span data-k1="' + k + '">' + stufe1Html(vrsta, spol, k) + '</span></label>';
       }).join('') + '</div>' +
       '<div class="klasa-2"' + (s1 === 'starije' && I18n.imaStufe2(vrsta) ? '' : ' hidden') + '><span class="field-label req">' + esc(t('klasaDob')) + '</span><div class="radio-group klasa-group three">' +
       STUFE2.map(function (k) {
@@ -110,7 +112,7 @@ var Odstrjel = (function () {
   function klasaUpdate(root, name, vrsta, spol) {
     var box = root.querySelector('[data-klasa-pick="' + name + '"]');
     if (!box) return;
-    UI.$$('[data-k1]', box).forEach(function (x) { x.textContent = stufe1Label(vrsta, spol, x.getAttribute('data-k1')); });
+    UI.$$('[data-k1]', box).forEach(function (x) { x.innerHTML = stufe1Html(vrsta, spol, x.getAttribute('data-k1')); });
     UI.$$('[data-k2]', box).forEach(function (x) { x.innerHTML = stufe2Label(vrsta, x.getAttribute('data-k2')); });
     var s1 = box.querySelector('input[name="' + name + '-1"]:checked');
     box.querySelector('.klasa-2').hidden = !(s1 && s1.value === 'starije' && I18n.imaStufe2(vrsta));

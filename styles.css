@@ -583,6 +583,7 @@ body.picker-open{overflow:hidden;}
 
 /* Altersklassen: erste Zeile Jungtier · Jährling · Älter, zweite Zeile mladi · srednji · zreli (LGO) */
 .radio-group.klasa-group.three{grid-template-columns:repeat(3,minmax(0,1fr));}
-.klasa-group label span{display:block;line-height:1.25;}
+.klasa-group.three label{display:flex;align-items:center;justify-content:center;min-height:56px;padding:8px 4px;font-size:.86rem;}
+.klasa-group label span{display:block;line-height:1.25;hyphens:auto;-webkit-hyphens:auto;overflow-wrap:break-word;min-width:0;}
 .klasa-group small{display:block;font-weight:500;font-size:.72rem;opacity:.75;margin-top:2px;}
 .klasa-2{margin-top:12px;}
