@@ -114,7 +114,6 @@
    * Ort = Stand (kein GPS nötig), Datum/Revier/Jagdart kommen von der Jagd. Gespeichert wie jeder Abschuss.
    */
   var QUICK_SPECIES = ['Divlja svinja', 'Jelen obični', 'Jelen lopatar', 'Srna'];
-  var QUICK_KLASE = ['Tele/prase', 'Mlađa klasa', 'Zrela klasa'];
   function openQuick(l) {
     var stands = Store.objekti().filter(function (o) { return Array.isArray(l.stajalista) && l.stajalista.indexOf(o.id) !== -1; });
     var lovci = Store.lovci();
@@ -126,8 +125,7 @@
       }).join('') + '</div>' +
       '<div class="field" style="margin-top:12px"><span class="field-label req">' + esc(t('lblSpol')) + '</span><div class="radio-group">' +
       '<label><input type="radio" name="q-spol" value="m"><span>' + esc(t('spolM')) + '</span></label><label><input type="radio" name="q-spol" value="ž"><span>' + esc(t('spolZ')) + '</span></label></div></div>' +
-      '<div class="field"><span class="field-label req">' + esc(t('klasa')) + '</span><div class="radio-group klasa-group">' +
-      QUICK_KLASE.map(function (k) { return '<label><input type="radio" name="q-klasa" value="' + esc(k) + '"><span data-klasa="' + esc(k) + '">' + esc(I18n.klasaFor('', k)) + '</span></label>'; }).join('') + '</div></div>' +
+      '<div class="field"><span class="field-label req">' + esc(t('klasa')) + '</span>' + Odstrjel.klasaHtml('q-klasa', '', '', '') + '</div>' +
       '<div id="q-trofej"></div>' +
       '<div class="grid-2"><div class="field"><label class="field-label req" for="q-kg">' + esc(t('lblTezinaShort')) + '</label><div class="unit-wrap"><input type="number" id="q-kg" inputmode="decimal" min="1" step="0.5"><span>kg</span></div></div>' +
       '<div class="field"><label class="field-label req" for="q-marka">' + esc(t('lblMarkica')) + '</label><input type="text" id="q-marka" inputmode="numeric"></div></div>' +
@@ -141,9 +139,10 @@
       '<div class="error-msg" id="q-err" hidden></div>' +
       '<button type="submit" class="btn primary block" style="min-height:52px">' + esc(t('btnSave')) + '</button></form>';
     UI.openSheet(html, function (el) {
-      function klasa() { var k = el.querySelector('input[name=q-klasa]:checked'); return k ? k.value : ''; }
+      function klasa() { return Odstrjel.klasaValue(el, 'q-klasa', q.species); }
       function spol() { var x = el.querySelector('input[name=q-spol]:checked'); return x ? x.value : ''; }
       function trofej() {
+        Odstrjel.klasaUpdate(el, 'q-klasa', q.species, spol());
         var nacin = Odstrjel.trofejNacin(q.species, spol(), klasa());
         if (nacin === 'foto') nacin = '';
         if (nacin === q.trofej) return;
@@ -153,21 +152,20 @@
       function setSpecies(v) {
         q.species = v;
         UI.$$('.species-btn', el).forEach(function (b) { b.setAttribute('aria-pressed', String(b.getAttribute('data-sp') === v)); });
-        UI.$$('[data-klasa]', el).forEach(function (x) { x.textContent = I18n.klasaFor(v, x.getAttribute('data-klasa')); });
         var svinja = v === 'Divlja svinja';
         el.querySelector('#q-nap-label').classList.toggle('req', svinja);
         el.querySelector('#q-nap-ok').hidden = !svinja;
         trofej();
       }
       UI.$$('.species-btn', el).forEach(function (b) { b.onclick = function () { setSpecies(b.getAttribute('data-sp')); }; });
-      UI.$$('input[name=q-spol], input[name=q-klasa]', el).forEach(function (r) { r.onchange = trofej; });
+      UI.$$('input[name=q-spol], input[name^="q-klasa-"]', el).forEach(function (r) { r.onchange = trofej; });
       el.querySelector('#q-nap-ok').onclick = function () { var n = el.querySelector('#q-nap'); if (!n.value.trim()) n.value = I18n._dict.hr.btnNoAnomalies.toLowerCase(); };
       el.querySelector('#q-form').addEventListener('submit', async function (ev) {
         ev.preventDefault();
         var err = el.querySelector('#q-err'); err.hidden = true;
         function fail(m) { err.textContent = m; err.hidden = false; }
         var v = function (id) { var x = el.querySelector('#' + id); return x ? x.value.trim() : ''; };
-        var data = { vrsta: q.species, spol: spol(), dobnaKlasa: klasa(), tezina: v('q-kg'), brojMarkice: v('q-marka'), lovac: v('q-lovac'),
+        var data = { vrsta: q.species, spol: spol(), dobnaKlasa: klasa(), klaseV: 2, tezina: v('q-kg'), brojMarkice: v('q-marka'), lovac: v('q-lovac'),
           napomena: v('q-nap'), lokacija: l.lokacija, datum: String(l.datum).slice(0, 10), nacinLova: 'Prigon/pogon', lovId: l.id,
           stajaliste: v('q-stand'), lat: '', lon: '', zona: '', vrijemeOdstrjela: '' };
         if (!data.vrsta) return fail(t('errSelectVrsta'));
@@ -196,8 +194,9 @@
         // Für das nächste Stück leeren; Wildart bleibt (meist mehrere Sauen hintereinander)
         ['q-kg', 'q-marka', 'q-lovac', 'q-nap'].forEach(function (id) { el.querySelector('#' + id).value = ''; });
         if (el.querySelector('#q-stand')) el.querySelector('#q-stand').value = '';
-        UI.$$('input[name=q-spol], input[name=q-klasa]', el).forEach(function (r) { r.checked = false; });
+        UI.$$('input[name=q-spol], input[name^="q-klasa-"]', el).forEach(function (r) { r.checked = false; });
         q.trofej = null; el.querySelector('#q-trofej').innerHTML = '';
+        Odstrjel.klasaUpdate(el, 'q-klasa', q.species, '');
         el.querySelector('#q-sub').textContent = (l.naziv || t('lovDefaultName')) + ' · ' + UI.fmtDay(String(l.datum).slice(0, 10)) + ' · ' + t('lovQuickN', { n: q.n });
         el.scrollTop = 0;
       });

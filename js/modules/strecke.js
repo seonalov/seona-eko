@@ -101,9 +101,10 @@ var Strecke = (function () {
     var faktor = state.lok === 'all' ? 3 : 1;
     return PLAN_SPECIES.map(function (v) {
       var p = Stats.planFor(v, list, faktor);
-      var rows = p.rows.map(function (row) {
+      // Klassen ohne Soll (z. B. Rehkitze) nur zeigen, wenn dort trotzdem etwas erlegt wurde
+      var rows = p.rows.filter(function (row) { return row.soll || row.ist; }).map(function (row) {
         var pct = row.soll ? Math.min(100, Math.round(row.ist / row.soll * 100)) : 0;
-        var split = (row.sollM != null) ? '<span class="r-sub num">♂ ' + row.istM + '/' + row.sollM + ' · ♀ ' + row.istZ + '/' + row.sollZ + '</span>' : '';
+        var split = (row.sollM != null) ? '<span class="r-sub num sex-split"><span>' + ICONS.male + row.istM + '/' + row.sollM + '</span><span>' + ICONS.female + row.istZ + '/' + row.sollZ + '</span></span>' : '';
         return '<tr><td>' + esc(I18n.klasaFor(v, row.klase[row.klase.length - 1])) + split +
           '<div class="bar"><span class="' + (row.ist > row.soll ? 'over' : '') + '" style="width:' + pct + '%"></span></div></td>' +
           '<td class="n" style="width:70px"><b class="num">' + row.ist + '</b> / ' + row.soll + '</td></tr>';

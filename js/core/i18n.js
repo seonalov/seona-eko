@@ -281,7 +281,7 @@ var I18n = (function () {
       tour_homeQuick_t: 'Brzi pristup', tour_homeQuick_x: 'Odavde odmah upisujete objekt ili otvarate lovostaj.',
       tour_sync_t: 'Slanje', tour_sync_x: 'Ovdje vidite je li sve preneseno. Za to se ne morate brinuti, aplikacija sama šalje podatke čim ima signala.',
       tour_formArt_t: 'Vrsta', tour_formArt_x: 'Obrazac se otvara nakon „{neu}". Počinjete s vrstom i spolom.',
-      tour_formKlasa_t: 'Dobna klasa', tour_formKlasa_x: 'Mlado, jednogodišnje ili starije grlo. Nazivi se mijenjaju prema vrsti.',
+      tour_formKlasa_t: 'Dobna klasa', tour_formKlasa_x: 'Mladunče, pomladak ili starije grlo. Kod starijeg grla još odaberite mladu, srednju ili zrelu klasu prema LGO.',
       tour_formOrt_t: 'Mjesto', tour_formOrt_x: 'Na mjestu odstrjela dovoljno je „{standort}". Upisujete li kasnije, npr. kod hladnjače, mjesto odaberite s „{karte}".',
       tour_formCold_t: 'Hladnjača', tour_formCold_x: 'Ide li grlo u hladnjaču, ostavite kvačicu. Tada je odmah na popisu hladnjače.',
       tour_formSave_t: 'Spremi', tour_formSave_x: 'Dodajte težinu, markicu i lovca pa spremite. Bez signala unos pričeka i kasnije se sam pošalje.',
@@ -301,7 +301,7 @@ var I18n = (function () {
       tour_lovNew_t: 'Novi skupni lov', tour_lovNew_x: 'Skupni lov upisujete s datumom, lovištem, stajalištima i sudionicima.',
       tour_lovOpen_t: 'Skupni lov', tour_lovOpen_x: 'Na dan lova ovdje preko „{stueck}" upisujete odstrjel. Mjesto je stajalište.',
       tour_gostNew_t: 'Novi gost', tour_gostNew_x: 'Prvo dodajte gosta s imenom i boravkom. Zatim kod gosta upišite termine i pokažite mu QR kod. Kad ga skenira, ima aplikaciju.',
-      lblWeapon: 'Oružje', setupWelcome: 'Dobro došli u revir.', btnScanQr: 'Skeniraj QR kod', setupOr: 'ili upišite kod', scanHint: 'Držite QR kod u okviru.', scanNoCamera: 'Kamera nije dostupna. Upišite kod ručno.', scanForeign: 'Ovo nije QR kod za Seona Eko.', weaponOwn: 'Vlastito', weaponLoan: 'Posudba', guestCodeHint: 'Na iPhoneu: instalirati aplikaciju, zatim u njoj „Skeniraj QR kod“ ili upisati kod.',
+      lblWeapon: 'Oružje', klasaDob: 'Dob — procijenite po zubima', setupWelcome: 'Dobro došli u revir.', btnScanQr: 'Skeniraj QR kod', setupOr: 'ili upišite kod', scanHint: 'Držite QR kod u okviru.', scanNoCamera: 'Kamera nije dostupna. Upišite kod ručno.', scanForeign: 'Ovo nije QR kod za Seona Eko.', weaponOwn: 'Vlastito', weaponLoan: 'Posudba', guestCodeHint: 'Na iPhoneu: instalirati aplikaciju, zatim u njoj „Skeniraj QR kod“ ili upisati kod.',
       tour_vise_t: 'Više', tour_vise_x: 'Ovdje su lovostaj, vrijeme, prijenos, karta i jezik.',
       tour_viseMap_t: 'Spremi kartu', tour_viseMap_x: 'Ovdje jednom preuzmite kartu, pa radi i bez signala.',
       tour_viseTeam_t: 'Mobitel za tim', tour_viseTeam_x: 'Ako netko u timu treba aplikaciju, pokažite mu ovaj QR kod.',
@@ -335,7 +335,7 @@ var I18n = (function () {
       tour_homeQuick_t: 'Shortcuts', tour_homeQuick_x: 'From here you go straight to adding a facility or to the hunting seasons.',
       tour_sync_t: 'Sending', tour_sync_x: 'Here you see whether everything is transferred. You don’t need to worry about it: the app transfers on its own once there is signal.',
       tour_formArt_t: 'Species', tour_formArt_x: 'This form opens after "{neu}". You start with species and sex.',
-      tour_formKlasa_t: 'Age class', tour_formKlasa_x: 'Young, yearling or older. The names follow the species.',
+      tour_formKlasa_t: 'Age class', tour_formKlasa_x: 'Young of the year, yearling or older. For an older animal also pick young, middle-aged or mature, as in the management plan.',
       tour_formOrt_t: 'Place', tour_formOrt_x: 'On the spot, "{standort}" is enough. If you enter it later, e.g. at the cold room, choose the place with "{karte}".',
       tour_formCold_t: 'Cold room', tour_formCold_x: 'If the animal goes into the cold room, leave the tick set. It then appears in the cold room list straight away.',
       tour_formSave_t: 'Save', tour_formSave_x: 'Add weight, tag and hunter, then save. Without signal the entry waits and goes out later on its own.',
@@ -355,7 +355,7 @@ var I18n = (function () {
       tour_lovNew_t: 'New driven hunt', tour_lovNew_x: 'You set up a driven hunt with date, ground, stands and participants.',
       tour_lovOpen_t: 'Driven hunt', tour_lovOpen_x: 'On the day you can record the bag here with "{stueck}". The place is the stand.',
       tour_gostNew_t: 'New guest', tour_gostNew_x: 'First add the guest with name and stay. Then enter the dates under the guest and show them the QR code. They scan it and have the app.',
-      lblWeapon: 'Rifle', setupWelcome: 'Welcome to the hunting ground.', btnScanQr: 'Scan QR code', setupOr: 'or enter the code', scanHint: 'Hold the QR code inside the frame.', scanNoCamera: 'No camera available. Please type the code.', scanForeign: 'This is not a Seona Eko QR code.', weaponOwn: 'Own', weaponLoan: 'Loan', guestCodeHint: 'On an iPhone: install the app, then tap “Scan QR code” in it or type the code.',
+      lblWeapon: 'Rifle', klasaDob: 'Age — judge by the teeth', setupWelcome: 'Welcome to the hunting ground.', btnScanQr: 'Scan QR code', setupOr: 'or enter the code', scanHint: 'Hold the QR code inside the frame.', scanNoCamera: 'No camera available. Please type the code.', scanForeign: 'This is not a Seona Eko QR code.', weaponOwn: 'Own', weaponLoan: 'Loan', guestCodeHint: 'On an iPhone: install the app, then tap “Scan QR code” in it or type the code.',
       tour_vise_t: 'More', tour_vise_x: 'Here you find seasons, weather, transfer, map and language.',
       tour_viseMap_t: 'Save map', tour_viseMap_x: 'Download the map here once and it works without signal.',
       tour_viseTeam_t: 'Team phone', tour_viseTeam_x: 'If someone in the team needs the app, show them this QR code.',
@@ -389,7 +389,7 @@ var I18n = (function () {
       tour_homeQuick_t: 'Schnellzugriff', tour_homeQuick_x: 'Von hier kommen Sie direkt zum Eintragen einer Einrichtung oder zu den Jagdzeiten.',
       tour_sync_t: 'Senden', tour_sync_x: 'Hier sehen Sie, ob alles übertragen ist. Darum müssen Sie sich nicht kümmern: Die App überträgt von selbst, sobald Empfang da ist.',
       tour_formArt_t: 'Wildart', tour_formArt_x: 'Dieses Formular öffnet sich nach „{neu}". Sie beginnen mit Wildart und Geschlecht.',
-      tour_formKlasa_t: 'Klasse', tour_formKlasa_x: 'Jung, Jährling oder älter. Die Namen passen sich der Wildart an.',
+      tour_formKlasa_t: 'Klasse', tour_formKlasa_x: 'Jungtier, Jährling oder älter. Bei älteren Stücken zusätzlich jung, mittel oder reif wählen, wie im Abschussplan.',
       tour_formOrt_t: 'Ort', tour_formOrt_x: 'Am Anschuss genügt „{standort}". Tragen Sie später ein, etwa an der Kühlzelle, wählen Sie den Ort mit „{karte}".',
       tour_formCold_t: 'Kühlzelle', tour_formCold_x: 'Kommt das Stück in die Kühlzelle, Haken gesetzt lassen. Es steht dann gleich in der Kühlzellen-Liste.',
       tour_formSave_t: 'Speichern', tour_formSave_x: 'Gewicht, Wildmarke und Schütze dazu, dann speichern. Ohne Empfang wartet der Eintrag und geht später von selbst raus.',
@@ -409,7 +409,7 @@ var I18n = (function () {
       tour_lovNew_t: 'Neue Drückjagd', tour_lovNew_x: 'Eine Drückjagd legen Sie mit Datum, Revier, Ständen und Teilnehmern an.',
       tour_lovOpen_t: 'Drückjagd', tour_lovOpen_x: 'Am Jagdtag können Sie hier mit „{stueck}" die Strecke aufnehmen. Als Ort gilt der Stand.',
       tour_gostNew_t: 'Neuer Gast', tour_gostNew_x: 'Legen Sie zuerst den Gast an, mit Name und Aufenthalt. Danach tragen Sie beim Gast die Termine ein und zeigen ihm den QR-Code. Er scannt ihn und hat die App.',
-      lblWeapon: 'Waffe', setupWelcome: 'Willkommen im Revier.', btnScanQr: 'QR-Code scannen', setupOr: 'oder Code eingeben', scanHint: 'QR-Code in den Rahmen halten.', scanNoCamera: 'Keine Kamera verfügbar. Bitte den Code eintippen.', scanForeign: 'Das ist kein QR-Code für Seona Eko.', weaponOwn: 'Eigene', weaponLoan: 'Leihwaffe', guestCodeHint: 'Auf dem iPhone: App installieren, dann darin „QR-Code scannen“ tippen oder den Code eingeben.',
+      lblWeapon: 'Waffe', klasaDob: 'Alter — nach den Zähnen schätzen', setupWelcome: 'Willkommen im Revier.', btnScanQr: 'QR-Code scannen', setupOr: 'oder Code eingeben', scanHint: 'QR-Code in den Rahmen halten.', scanNoCamera: 'Keine Kamera verfügbar. Bitte den Code eintippen.', scanForeign: 'Das ist kein QR-Code für Seona Eko.', weaponOwn: 'Eigene', weaponLoan: 'Leihwaffe', guestCodeHint: 'Auf dem iPhone: App installieren, dann darin „QR-Code scannen“ tippen oder den Code eingeben.',
       tour_vise_t: 'Mehr', tour_vise_x: 'Hier finden Sie Jagdzeiten, Wetter, Übertragung, Karte und Sprache.',
       tour_viseMap_t: 'Karte speichern', tour_viseMap_x: 'Laden Sie die Karte hier einmal herunter, dann funktioniert sie ohne Empfang.',
       tour_viseTeam_t: 'Team-Handy', tour_viseTeam_x: 'Braucht jemand im Team die App, zeigen Sie ihm diesen QR-Code.',
@@ -424,34 +424,49 @@ var I18n = (function () {
     'Divlja svinja': ['Divlja svinja', 'Wild boar', 'Schwarzwild'], 'Jelen lopatar': ['Jelen lopatar', 'Fallow deer', 'Damwild'],
     'Muflon': ['Muflon', 'Mouflon', 'Muffelwild'], 'Ostalo': ['Ostale vrste', 'Other species', 'Andere Arten']
   };
+  // Anzeige der Altersklassen (gespeichert wird immer der kroatische Sheet-Wert, siehe js/data/plan.js)
   var KLASE = {
-    'Tele/prase': ['Tele / prase', 'Calf / piglet', 'Kalb / Frischling'], 'Mlađa klasa': ['Mlađa klasa', 'Young class', 'Jugendklasse'],
-    'Srednja klasa': ['Srednja klasa', 'Middle class', 'Mittelklasse'], 'Zrela klasa': ['Zrela klasa', 'Mature class', 'Reife Klasse']
+    'Tele/prase': ['Mladunčad', 'Young of the year', 'Jungtier'], 'Pomladak': ['Pomladak', 'Yearling', 'Jährling'],
+    'Mlađa klasa': ['Mlada klasa', 'Young class', 'Jugendklasse'], 'Srednja klasa': ['Srednja klasa', 'Middle class', 'Mittelklasse'],
+    'Zrela klasa': ['Zrela klasa', 'Mature class', 'Reife Klasse']
   };
-  /**
-   * Altersklasse im Formular: drei einfache Stufen je Wildart (jung · Jährling · älter). Gespeichert wird weiter der
-   * kroatische Sheet-Wert (Tele/prase · Mlađa klasa · Zrela klasa), an dem Plan und Kategorien im Sheet hängen.
-   */
-  var KLASE_VRSTA = {
-    'Divlja svinja': { 'Tele/prase': ['Prase', 'Piglet', 'Frischling'], 'Mlađa klasa': ['Nazime', 'Yearling', 'Überläufer'] },
-    'Jelen obični': { 'Tele/prase': ['Tele', 'Calf', 'Kalb'], 'Mlađa klasa': ['Mlado grlo', 'Yearling', 'Jährling'] },
-    'Jelen lopatar': { 'Tele/prase': ['Tele', 'Calf', 'Kalb'], 'Mlađa klasa': ['Mlado grlo', 'Yearling', 'Jährling'] },
-    'Srna': { 'Tele/prase': ['Lane', 'Fawn', 'Kitz'], 'Mlađa klasa': ['Mlado grlo', 'Yearling', 'Jährling'] },
-    'Muflon': { 'Tele/prase': ['Janje', 'Lamb', 'Lamm'], 'Mlađa klasa': ['Mlado grlo', 'Yearling', 'Jährling'] }
+  /** Erste Zeile im Formular, solange noch kein Geschlecht gewählt ist: Jungtier und Jährling je Wildart. */
+  var KLASA_TELE = {
+    'Jelen obični': ['Tele', 'Calf', 'Kalb'], 'Jelen lopatar': ['Tele', 'Calf', 'Kalb'], 'Srna': ['Lane', 'Kid', 'Kitz'],
+    'Divlja svinja': ['Prase', 'Piglet', 'Frischling'], 'Muflon': ['Janje', 'Lamb', 'Lamm'], '*': ['Mladunče', 'Young', 'Jungtier']
+  };
+  var KLASA_POMLADAK = {
+    'Jelen obični': ['Šilaš / junica', 'Yearling', 'Schmalspießer / Schmaltier'], 'Jelen lopatar': ['Šilaš / junica', 'Pricket / yearling doe', 'Spießer / Schmaltier'],
+    'Srna': ['Jednogodišnje grlo', 'Yearling', 'Jährling / Schmalreh'], 'Divlja svinja': ['Nazime', 'Yearling', 'Überläufer'],
+    'Muflon': ['Jednogodišnje grlo', 'Yearling', 'Jährling'], '*': ['Jednogodišnje grlo', 'Yearling', 'Jährling']
   };
   var KLASA_STARIJE = ['Starije', 'Older', 'Älter'];
-  var KLASA_JUNG = { 'Tele/prase': ['Mlado', 'Young', 'Jung'], 'Mlađa klasa': ['Jednogodišnje', 'Yearling', 'Jährling'] };
-  /** Alte Werte auf die drei Stufen abbilden: Srednja klasa = beim Schwarzwild Überläufer, sonst älter. */
-  function klasaStufe(vrsta, v) {
-    if (v === 'Srednja klasa') return vrsta === 'Divlja svinja' ? 'Mlađa klasa' : 'Zrela klasa';
-    return v;
+  /** Zweite Zeile (nur Arten mit LGO-Plan): mladi · srednji · zreli. */
+  var KLASA_STUFE2 = {
+    'Mlađa klasa': ['Mlada', 'Young', 'Jung'], 'Srednja klasa': ['Srednja', 'Middle-aged', 'Mittel'], 'Zrela klasa': ['Zrela', 'Mature', 'Reif']
+  };
+  var STUFE2 = ['Mlađa klasa', 'Srednja klasa', 'Zrela klasa'];
+  /** Lebensjahre einer Klasse, z. B. „3.–4. Lj.“ · „3.–4. god.“ · „yr 3–4“; ab-Klasse „ab 8. Lj.“ · „od 8. god.“ · „yr 8+“. */
+  function godine(vrsta, v) {
+    var g = (typeof KLASE_GODINE !== 'undefined' ? KLASE_GODINE : {})[vrsta], i = STUFE2.indexOf(v);
+    if (!g || i === -1) return '';
+    var a = g[i][0], b = g[i][1];
+    if (lang === 'en') return 'yr ' + a + (b == null ? '+' : b !== a ? '–' + b : '');
+    var unit = lang === 'de' ? ' Lj.' : ' god.';
+    if (b == null) return (lang === 'de' ? 'ab ' : 'od ') + a + '.' + unit;
+    return a + '.' + (b !== a ? '–' + b + '.' : '') + unit;
   }
+  function imaStufe2(vrsta) { return !!(typeof KLASE_GODINE !== 'undefined' ? KLASE_GODINE : {})[vrsta]; }
+  /** Bezeichnung einer Klasse für Anzeige und Plan: „Kalb“, „Schmalspießer / Schmaltier“, „Jung (3.–4. Lj.)“ … */
   function klasaFor(vrsta, v) {
     if (!v) return '—';
-    v = klasaStufe(vrsta, v);
-    if (v === 'Zrela klasa') return KLASA_STARIJE[idx()];
-    var t = (KLASE_VRSTA[vrsta] || {})[v] || KLASA_JUNG[v];
-    return t ? t[idx()] : pick(KLASE, v);
+    if (v === 'Tele/prase') return (KLASA_TELE[vrsta] || KLASA_TELE['*'])[idx()];
+    if (v === 'Pomladak') return (KLASA_POMLADAK[vrsta] || KLASA_POMLADAK['*'])[idx()];
+    if (STUFE2.indexOf(v) !== -1) {
+      if (!imaStufe2(vrsta)) return KLASA_STARIJE[idx()];
+      return KLASA_STUFE2[v][idx()] + ' (' + godine(vrsta, v) + ')';
+    }
+    return pick(KLASE, v);
   }
 
   var NACINI = {
@@ -509,7 +524,11 @@ var I18n = (function () {
     locale: function () { return { hr: 'hr-HR', en: 'en-GB', de: 'de-DE' }[lang]; },
     species: function (v) { return pick(SPECIES, v); },
     klasa: function (v) { return v ? pick(KLASE, v) : '—'; },
-    klasaFor: klasaFor, klasaStufe: klasaStufe,
+    klasaFor: klasaFor, godine: godine, imaStufe2: imaStufe2,
+    klasaTele: function (vrsta) { return (KLASA_TELE[vrsta] || KLASA_TELE['*'])[idx()]; },
+    klasaPomladak: function (vrsta) { return (KLASA_POMLADAK[vrsta] || KLASA_POMLADAK['*'])[idx()]; },
+    klasaStarije: function () { return KLASA_STARIJE[idx()]; },
+    klasaStufe2: function (v) { return KLASA_STUFE2[v] ? KLASA_STUFE2[v][idx()] : ''; },
     nacin: function (v) { return v ? pick(NACINI, v) : ''; },
     objekt: function (v) { return pick(OBJEKTI, v); },
     stanje: function (v) { return pick(STANJA, v || 'dobro'); },

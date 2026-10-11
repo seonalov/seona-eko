@@ -404,6 +404,9 @@ details.more[open] summary::before{content:"–";}
 .plan-table td{padding:9px 0;border-top:1px solid var(--line);}
 .plan-table td .bar{margin-top:5px;}
 .plan-table .r-sub{display:block;font-size:.8rem;color:var(--ink-soft);margin-top:2px;}
+.sex-split{display:flex !important;gap:14px;align-items:center;}
+.sex-split > span{display:inline-flex;align-items:center;gap:3px;}
+.sex-split svg{width:13px;height:13px;stroke-width:3.2;flex:none;}
 .plan-table tr.sum td{font-weight:700;}
 
 .legal{font-size:.75rem;color:var(--ink-soft);line-height:1.45;}
@@ -577,3 +580,9 @@ body.picker-open{overflow:hidden;}
 .scan-frame{position:absolute;left:50%;top:42%;width:min(64vw,260px);aspect-ratio:1;transform:translate(-50%,-50%);border:3px solid rgba(255,255,255,.9);border-radius:18px;box-shadow:0 0 0 100vmax rgba(0,0,0,.35);pointer-events:none;}
 .scan-bar{padding:16px 20px calc(16px + env(safe-area-inset-bottom));background:var(--forest-1);color:var(--accent-ink);}
 .scan-bar p{margin:0 0 12px;text-align:center;color:var(--sage);}
+
+/* Altersklassen: erste Zeile Jungtier · Jährling · Älter, zweite Zeile mladi · srednji · zreli (LGO) */
+.radio-group.klasa-group.three{grid-template-columns:repeat(3,minmax(0,1fr));}
+.klasa-group label span{display:block;line-height:1.25;}
+.klasa-group small{display:block;font-weight:500;font-size:.72rem;opacity:.75;margin-top:2px;}
+.klasa-2{margin-top:12px;}

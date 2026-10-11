@@ -26,6 +26,8 @@ var ICONS = (function () {
     sun: '<circle cx="24" cy="26" r="7"/><path d="M24 11v4"/><path d="M11 26H7"/><path d="M41 26h-4"/><path d="M14.5 16.5l-2.8-2.8"/><path d="M33.5 16.5l2.8-2.8"/><path d="M6 38h36"/>',
     sync: '<path d="M38 20a14 14 0 0 0-26-4"/><path d="M10 28a14 14 0 0 0 26 4"/><path d="M12 8v8h8"/><path d="M36 40v-8h-8"/>',
     gear: '<circle cx="24" cy="24" r="6"/><path d="M24 6v6M24 36v6M6 24h6M36 24h6M11.3 11.3l4.2 4.2M32.5 32.5l4.2 4.2M11.3 36.7l4.2-4.2M32.5 15.5l4.2-4.2"/>',
+    male: '<circle cx="20" cy="28" r="11"/><path d="M28 20 40 8"/><path d="M30 8h10v10"/>',
+    female: '<circle cx="24" cy="18" r="11"/><path d="M24 29v13"/><path d="M18 36h12"/>',
     camera: '<rect x="7" y="15" width="34" height="23" rx="3"/><circle cx="24" cy="26.5" r="7"/><path d="M17 15l3-5h8l3 5"/>',
     pin: '<path d="M24 42s-12-12.5-12-21a12 12 0 0 1 24 0c0 8.5-12 21-12 21z"/><circle cx="24" cy="21" r="4"/>',
     check: '<circle cx="24" cy="24" r="18"/><path d="M16 25l5.5 5.5L32.5 19"/>',

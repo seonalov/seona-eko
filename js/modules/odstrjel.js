@@ -6,8 +6,8 @@
 var Odstrjel = (function () {
   var esc = UI.esc, t = I18n.t;
   var SPECIES = ['Jelen obični', 'Srna', 'Divlja svinja', 'Jelen lopatar', 'Muflon', 'Ostalo'];
-  // Drei Stufen: jung · Jährling · älter (Beschriftung je Wildart, I18n.klasaFor); „Srednja klasa" alter Einträge wird zugeordnet
-  var KLASE = ['Tele/prase', 'Mlađa klasa', 'Zrela klasa'];
+  // Altersklassen wie in der LGO (js/data/plan.js): erste Zeile Jungtier · Jährling · Älter, bei „Älter“ zweite Zeile mladi · srednji · zreli
+  var STUFE1 = ['Tele/prase', 'Pomladak', 'starije'], STUFE2 = ['Mlađa klasa', 'Srednja klasa', 'Zrela klasa'];
   var NACINI = ['Dočeka (usjedanje)', 'Prigon/pogon', 'Šuljanje', 'Uginula divljač'];
   var st = null; // Formularzustand
 
@@ -52,8 +52,7 @@ var Odstrjel = (function () {
       '<label><input type="radio" name="spol" value="m"' + (d.spol === 'm' ? ' checked' : '') + '><span>' + esc(t('spolM')) + '</span></label>' +
       '<label><input type="radio" name="spol" value="ž"' + (d.spol === 'ž' ? ' checked' : '') + '><span>' + esc(t('spolZ')) + '</span></label></div></div>' +
       // Altersklasse als große Knöpfe und Pflichtfeld — die Planerfüllung (Frischlinge, Klassen) hängt daran
-      '<div class="field"><span class="field-label req" id="klasa-label">' + esc(t('klasa')) + '</span><div class="radio-group klasa-group">' +
-      KLASE.map(function (k) { return '<label><input type="radio" name="dobnaKlasa" value="' + esc(k) + '"' + (I18n.klasaStufe(d.vrsta, d.dobnaKlasa) === k ? ' checked' : '') + '><span data-klasa="' + esc(k) + '">' + esc(I18n.klasaFor(sp, k)) + '</span></label>'; }).join('') + '</div></div>' +
+      '<div class="field"><span class="field-label req" id="klasa-label">' + esc(t('klasa')) + '</span>' + klasaHtml('dobnaKlasa', sp, d.spol, d.dobnaKlasa) + '</div>' +
       '<div id="trofej-wrap"></div>' +
       '<div class="grid-2"><div class="field"><label class="field-label req" for="tezina">' + esc(t('lblTezinaShort')) + '</label><div class="unit-wrap"><input type="number" id="tezina" inputmode="decimal" min="1" step="0.5" value="' + esc(d.tezina || '') + '"><span>kg</span></div></div>' +
       '<div class="field"><label class="field-label req" for="brojMarkice">' + esc(t('lblMarkica')) + '</label><input type="text" id="brojMarkice" inputmode="numeric" value="' + esc(d.brojMarkice || '') + '"></div></div>' +
@@ -86,6 +85,46 @@ var Odstrjel = (function () {
       '</form>';
   }
 
+  /** Erste Zeile: mit gewähltem Geschlecht der jagdliche Name (Schmalspießer, Überläuferbache …), sonst der neutrale. */
+  function stufe1Label(vrsta, spol, v) {
+    if (v === 'starije') return I18n.klasaStarije();
+    if (spol && KATEGORIJA[vrsta]) { var n = kategorija(vrsta, spol, v, I18n.lang()); return n.charAt(0).toUpperCase() + n.slice(1); }
+    return v === 'Tele/prase' ? I18n.klasaTele(vrsta) : I18n.klasaPomladak(vrsta);
+  }
+  function stufe2Label(vrsta, v) {
+    return '<b>' + esc(I18n.klasaStufe2(v)) + '</b><small>' + esc(I18n.godine(vrsta, v)) + '</small>';
+  }
+  /** Altersklassen-Wähler (auch für die Drückjagd-Erfassung). name = Präfix der Radio-Gruppen. */
+  function klasaHtml(name, vrsta, spol, value) {
+    var s1 = STUFE2.indexOf(value) !== -1 ? 'starije' : value || '', s2 = STUFE2.indexOf(value) !== -1 ? value : '';
+    return '<div class="klasa-pick" data-klasa-pick="' + esc(name) + '"><div class="radio-group klasa-group three">' +
+      STUFE1.map(function (k) {
+        return '<label><input type="radio" name="' + esc(name) + '-1" value="' + k + '"' + (s1 === k ? ' checked' : '') + '><span data-k1="' + k + '">' + esc(stufe1Label(vrsta, spol, k)) + '</span></label>';
+      }).join('') + '</div>' +
+      '<div class="klasa-2"' + (s1 === 'starije' && I18n.imaStufe2(vrsta) ? '' : ' hidden') + '><span class="field-label req">' + esc(t('klasaDob')) + '</span><div class="radio-group klasa-group three">' +
+      STUFE2.map(function (k) {
+        return '<label><input type="radio" name="' + esc(name) + '-2" value="' + esc(k) + '"' + (s2 === k ? ' checked' : '') + '><span data-k2="' + esc(k) + '">' + stufe2Label(vrsta, k) + '</span></label>';
+      }).join('') + '</div></div></div>';
+  }
+  /** Beschriftung und zweite Zeile an Wildart/Geschlecht anpassen (gewählte Werte bleiben). */
+  function klasaUpdate(root, name, vrsta, spol) {
+    var box = root.querySelector('[data-klasa-pick="' + name + '"]');
+    if (!box) return;
+    UI.$$('[data-k1]', box).forEach(function (x) { x.textContent = stufe1Label(vrsta, spol, x.getAttribute('data-k1')); });
+    UI.$$('[data-k2]', box).forEach(function (x) { x.innerHTML = stufe2Label(vrsta, x.getAttribute('data-k2')); });
+    var s1 = box.querySelector('input[name="' + name + '-1"]:checked');
+    box.querySelector('.klasa-2').hidden = !(s1 && s1.value === 'starije' && I18n.imaStufe2(vrsta));
+  }
+  /** Gespeicherter Sheet-Wert; '' wenn nichts oder bei „Älter“ die zweite Zeile noch fehlt. */
+  function klasaValue(root, name, vrsta) {
+    var s1 = root.querySelector('input[name="' + name + '-1"]:checked');
+    if (!s1) return '';
+    if (s1.value !== 'starije') return s1.value;
+    if (!I18n.imaStufe2(vrsta)) return 'Zrela klasa';
+    var s2 = root.querySelector('input[name="' + name + '-2"]:checked');
+    return s2 ? s2.value : '';
+  }
+
   /**
    * Geweih/Trophäe: 'vrhovi' (Rothirsch: Enden), 'lopata' (Damhirsch: Schaufelstufe), 'foto' (Rehbock, Widder,
    * älterer Keiler: nur Foto-Knopf) oder ''. Nüchtern gehalten — Dokumentation, keine Trophäenschau.
@@ -96,7 +135,8 @@ var Odstrjel = (function () {
     if (vrsta === 'Jelen obični') return jung ? '' : 'vrhovi';
     if (vrsta === 'Jelen lopatar') return jung ? '' : 'lopata';
     if (vrsta === 'Srna' || vrsta === 'Muflon') return jung ? '' : 'foto';
-    if (vrsta === 'Divlja svinja') return klasa === 'Zrela klasa' ? 'foto' : '';
+    // Keilerwaffen: trophäenwürdig ab dem 3. Lebensjahr (LGO 3.2.3.1)
+    if (vrsta === 'Divlja svinja') return STUFE2.indexOf(klasa) !== -1 ? 'foto' : '';
     return '';
   }
 
@@ -127,8 +167,9 @@ var Odstrjel = (function () {
     var wrap = el.querySelector('#trofej-wrap');
     if (!wrap || !st) return;
     readTrofej(el);
-    var spol = el.querySelector('input[name=spol]:checked'), klasa = el.querySelector('input[name=dobnaKlasa]:checked');
-    var nacin = trofejNacin(st.species, spol ? spol.value : '', klasa ? klasa.value : '');
+    var spol = el.querySelector('input[name=spol]:checked');
+    klasaUpdate(el, 'dobnaKlasa', st.species, spol ? spol.value : '');
+    var nacin = trofejNacin(st.species, spol ? spol.value : '', klasaValue(el, 'dobnaKlasa', st.species));
     if (nacin === st.trofejNacin) return;
     st.trofejNacin = nacin;
     wrap.innerHTML = trofejHtml(nacin, { rogovlje: st.rogovlje, masa: st.masa, cic: st.cic, foto: st.foto },
@@ -153,7 +194,6 @@ var Odstrjel = (function () {
     el.querySelector('#napomena').placeholder = svinja ? t('phNapomenaSvinja') : t('phNapomena');
     el.querySelector('#napomena-ok').hidden = !svinja;
     el.querySelector('#klasa-label').classList.toggle('req', v !== 'Ostalo');
-    UI.$$('[data-klasa]', el).forEach(function (x) { x.textContent = I18n.klasaFor(v, x.getAttribute('data-klasa')); });
     var asp = el.querySelector('#asp-wrap');
     if (asp) asp.hidden = !svinja;
     updateTrofej(el);
@@ -194,7 +234,7 @@ var Odstrjel = (function () {
     }
 
     UI.$$('.species-btn', el).forEach(function (b) { b.onclick = function () { setSpecies(el, b.getAttribute('data-sp')); }; });
-    UI.$$('input[name=spol], input[name=dobnaKlasa]', el).forEach(function (r) { r.addEventListener('change', function () { updateTrofej(el); }); });
+    UI.$$('input[name=spol], input[name^="dobnaKlasa-"]', el).forEach(function (r) { r.addEventListener('change', function () { updateTrofej(el); }); });
     updateTrofej(el);
     // Schwarzwild: Pflichtbemerkung mit einem Tipp (Wert bleibt Kroatisch, wie alles im Sheet)
     el.querySelector('#napomena-ok').onclick = function () {
@@ -259,10 +299,10 @@ var Odstrjel = (function () {
     if (!st.species) return showError(el, t('errSelectVrsta'));
     if (st.species === 'Ostalo' && !v('vrstaOstalo')) return showError(el, t('errOstalo'));
     var spol = el.querySelector('input[name=spol]:checked');
-    var klasa = el.querySelector('input[name=dobnaKlasa]:checked');
+    var klasa = klasaValue(el, 'dobnaKlasa', st.species);
     var data = {
       vrsta: st.species === 'Ostalo' ? v('vrstaOstalo') : st.species,
-      tezina: v('tezina'), spol: spol ? spol.value : '', dobnaKlasa: klasa ? klasa.value : '',
+      tezina: v('tezina'), spol: spol ? spol.value : '', dobnaKlasa: klasa, klaseV: 2,
       brojMarkice: v('brojMarkice'), lokacija: v('lokacija'), datum: v('datum'), lovac: v('lovac'),
       napomena: v('napomena'), nacinLova: v('nacinLova'), zona: st.lat ? (st.zona || '') : (st.edit ? st.edit.zona || '' : ''),
       vrijemeOdstrjela: v('vrijemeOdstrjela'),
@@ -332,5 +372,5 @@ var Odstrjel = (function () {
     document.getElementById('done-close').onclick = function () { o.classList.remove('show'); App.go(data.lovId ? '#/lov/' + data.lovId : '#/odstrjel'); };
   }
 
-  return { render: render, mount: mount, trofejNacin: trofejNacin, trofejHtml: trofejHtml };
+  return { render: render, mount: mount, trofejNacin: trofejNacin, trofejHtml: trofejHtml, klasaHtml: klasaHtml, klasaUpdate: klasaUpdate, klasaValue: klasaValue };
 })();
