@@ -219,11 +219,11 @@ var Odstrjel = (function () {
       setSpecies(el, SPECIES.indexOf(edit.vrsta) === -1 ? 'Ostalo' : edit.vrsta);
       st.lovId = edit.lovId || ''; st.stajaliste = edit.stajaliste || '';
     } else {
-      // „wie letzter Eintrag": Lovište, Jagdart; Datum nur, wenn < 12 h her. Den Erleger nie vorbelegen —
-      // ein übersehener falscher Name landet sonst im amtlichen Nachweis (Vorschläge kommen beim Tippen).
+      // „wie letzter Eintrag" auf DIESEM Handy (IndexedDB, nie vom Server): Lovište, Jäger, Jagdart; Datum nur, wenn < 12 h her
       var last = (await DB.get('last')) || {};
       var q = ctx.query || {};
       if (last.lokacija) el.querySelector('#lokacija').value = last.lokacija;
+      if (last.lovac) el.querySelector('#lovac').value = last.lovac;
       if (last.nacinLova) el.querySelector('#nacinLova').value = last.nacinLova;
       var recent = last.at && Date.now() - last.at < 12 * 3600e3;
       el.querySelector('#datum').value = (recent && last.datum) || UI.todayISO();
