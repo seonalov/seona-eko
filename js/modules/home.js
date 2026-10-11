@@ -52,6 +52,9 @@
       // Seit über einem Tag nicht gesendet (z. B. Handy nie mit Netz geöffnet) — nicht nur oben rechts klein anzeigen
       var stale = Store.outbox().filter(function (e) { return e.status !== 'error' && Date.now() - e.createdAt > 864e5; }).length;
       var gast = nextGast();
+      // SLE: Wildmarken binnen 7 Tagen austragen — Hinweis, solange etwas offen ist (dringend ab 1 Tag Rest)
+      var sle = App.isUprava() ? Strecke.sleOpen(Stats.inJJ(Store.strecke())) : [];
+      var sleMin = sle.length ? Strecke.sleInfo(sle[0]).left : null;
 
       var pct = function (a, b) { return b ? Math.min(100, Math.round(a / b * 100)) : 0; };
 
@@ -63,6 +66,11 @@
           ICONS.alert.replace('<svg', '<svg style="width:24px;height:24px;color:var(--warn);flex:none"') + '<span><b>' + esc(t('homeErrors', { n: errors })) + '</b><br><span class="hint">' + esc(t('homeErrorsHint')) + '</span></span></a>' : '') +
         (stale ? '<a class="panel" href="#/vise?sync=1" style="display:flex;gap:10px;align-items:center;border-color:var(--warn);background:var(--warn-soft);text-decoration:none;color:inherit;margin-bottom:12px">' +
           ICONS.sync.replace('<svg', '<svg style="width:24px;height:24px;color:var(--warn);flex:none"') + '<span><b>' + esc(t('homeStale', { n: stale })) + '</b><br><span class="hint">' + esc(t('homeStaleHint')) + '</span></span></a>' : '') +
+
+        (sle.length ? '<a class="panel" href="#/odstrjel?tab=popis&sle=1" style="display:flex;gap:10px;align-items:center;text-decoration:none;color:inherit;margin-bottom:12px' +
+          (sleMin <= 1 ? ';border-color:var(--warn);background:var(--warn-soft)' : '') + '">' +
+          ICONS.list.replace('<svg', '<svg style="width:24px;height:24px;flex:none' + (sleMin <= 1 ? ';color:var(--warn)' : '') + '"') + '<span><b>' + esc(t('homeSle', { n: sle.length })) + '</b><br><span class="hint">' +
+          esc(sleMin > 0 ? t('homeSleHint', { n: sleMin }) : sleMin === 0 ? t('homeSleToday') : t('homeSleLate')) + '</span></span></a>' : '') +
 
         '<div class="quick">' +
         '<a class="primary" href="#/odstrjel/novi">' + ICONS.plus + '<span><b>' + esc(t('newOdstrjel')) + '</b></span></a>' +

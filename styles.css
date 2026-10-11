@@ -605,3 +605,7 @@ body.picker-open{overflow:hidden;}
 .wind-compass .wc-shaft{fill:none;stroke:var(--ink);stroke-width:1.6;stroke-linecap:round;}
 .map-wind.turning .wc-ring{stroke:var(--copper);stroke-width:1.4;}
 
+
+/* SLE-Liste: Markennummer antippen = kopieren */
+.sle-copy{border:0;background:var(--muted-soft);color:inherit;font:inherit;font-weight:700;padding:1px 6px;border-radius:6px;cursor:pointer;}
+.sle-row .r-end{display:flex;flex-direction:column;align-items:flex-end;}
