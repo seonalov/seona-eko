@@ -22,7 +22,6 @@
       '<p class="hint" style="margin:0 0 4px">' + esc(t('teamCodeLbl')) + '</p><p class="code-big">' + esc(code) + '</p>' +
       // Kollege am PC/Laptop: Link ohne Code schicken, den Code gibt er beim ersten Öffnen ein (Code nie per Nachricht)
       '<div class="section-title" style="margin-top:18px"><h2>' + esc(t('teamPcTitle')) + '</h2></div>' +
-      '<p class="hint" style="margin:0 0 8px">' + esc(t('teamPcText')) + '</p>' +
       '<p class="code-inline" style="margin:0 0 10px;word-break:break-all">' + esc(base) + '</p>' +
       '<button type="button" class="btn small" data-copy-addr>' + esc(t('btnCopyAddr')) + '</button>', function (el) {
       function copy(text, msg) {
