@@ -21,8 +21,7 @@
       '<p class="warn-text" style="text-align:center;margin:10px 0">' + esc(t('teamQrWarn')) + '</p>' +
       '<p class="hint" style="margin:0 0 4px">' + esc(t('teamCodeLbl')) + '</p><p class="code-big">' + esc(code) + '</p>' +
       // Kollege am PC/Laptop: Link ohne Code schicken, den Code gibt er beim ersten Öffnen ein (Code nie per Nachricht)
-      '<div class="section-title" style="margin-top:18px"><h2>' + esc(t('teamPcTitle')) + '</h2></div>' +
-      '<p class="code-inline" style="margin:0 0 10px;word-break:break-all">' + esc(base) + '</p>' +
+      '<p class="code-inline" style="margin:18px 0 10px;word-break:break-all">' + esc(base) + '</p>' +
       '<button type="button" class="btn small" data-copy-addr>' + esc(t('btnCopyAddr')) + '</button>', function (el) {
       function copy(text, msg) {
         if (navigator.clipboard) navigator.clipboard.writeText(text).then(function () { UI.toast(msg, { timeout: 6000 }); }, function () { UI.toast(text, { timeout: 15000 }); });
