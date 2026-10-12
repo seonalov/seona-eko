@@ -14,11 +14,25 @@
   /** QR-Code zum Einrichten eines Team-Handys (enthält den Team-Code → nur persönlich zeigen). */
   async function openTeamQr() {
     var code = (await DB.get('code')) || '';
-    var url = location.origin + location.pathname + '#/start?c=' + encodeURIComponent(code) + '&r=uprava&l=' + encodeURIComponent(I18n.lang());
+    var base = location.origin + location.pathname;
+    var url = base + '#/start?c=' + encodeURIComponent(code) + '&r=uprava&l=' + encodeURIComponent(I18n.lang());
     UI.openSheet('<h2>' + esc(t('teamQrTitle')) + '</h2><p class="sheet-sub">' + esc(t('teamQrHint')) + '</p>' +
       '<div class="qr-panel"><div class="qr">' + Gosti.qrSvg(url) + '</div></div>' +
       '<p class="warn-text" style="text-align:center;margin:10px 0">' + esc(t('teamQrWarn')) + '</p>' +
-      '<p class="hint" style="margin:0 0 4px">' + esc(t('teamCodeLbl')) + '</p><p class="code-big">' + esc(code) + '</p>', null, { noFocus: true });
+      '<p class="hint" style="margin:0 0 4px">' + esc(t('teamCodeLbl')) + '</p><p class="code-big">' + esc(code) + '</p>' +
+      // Kollege am PC/Laptop: kann den QR nicht scannen → Adresse öffnen und Code eintippen, oder Einrichtungslink
+      '<div class="section-title" style="margin-top:18px"><h2>' + esc(t('teamPcTitle')) + '</h2></div>' +
+      '<p class="hint" style="margin:0 0 8px">' + esc(t('teamPcText')) + '</p>' +
+      '<p class="code-inline" style="margin:0 0 10px;word-break:break-all">' + esc(base) + '</p>' +
+      '<div class="btn-row"><button type="button" class="btn small" data-copy-addr>' + esc(t('btnCopyAddr')) + '</button>' +
+      '<button type="button" class="btn small ghost" data-copy-setup>' + esc(t('btnCopySetup')) + '</button></div>', function (el) {
+      function copy(text, msg) {
+        if (navigator.clipboard) navigator.clipboard.writeText(text).then(function () { UI.toast(msg, { timeout: 6000 }); }, function () { UI.toast(text, { timeout: 15000 }); });
+        else UI.toast(text, { timeout: 15000 });
+      }
+      el.querySelector('[data-copy-addr]').onclick = function () { copy(base, t('copiedAddr')); };
+      el.querySelector('[data-copy-setup]').onclick = function () { copy(url, t('copiedSetup')); };
+    }, { noFocus: true });
   }
 
   App.route('vise', {
