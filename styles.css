@@ -66,6 +66,8 @@
 
 *{box-sizing:border-box;}
 html,body{margin:0;padding:0;height:100%;}
+/* Kein Nachfedern über den Seitenrand hinaus — sonst rutscht der Inhalt unter Kopfzeile und Menü weg („Glitch“) */
+html,body{overscroll-behavior:none;background:var(--cream);}
 body{
   background:var(--cream);
   color:var(--ink);
@@ -416,17 +418,20 @@ details.more[open] summary::before{content:"–";}
  * Karte über die ganze Fläche. --nav-h = 0, damit Karte, Hinweise und Einführung automatisch ohne untere Leiste rechnen.
  */
 @media (min-width: 720px), (orientation: landscape) and (max-height: 540px){
-  :root{--nav-h:0px;--rail-w:88px;--rail:calc(var(--rail-w) + env(safe-area-inset-left,0px));}
+  /* Abstand nur auf der Seite mit Kamera/Notch (html.notch-left/-right, app.js) — iOS meldet quer beide Seiten */
+  :root{--nav-h:0px;--rail-w:76px;--in-l:0px;--in-r:0px;--rail:calc(var(--rail-w) + var(--in-l));}
+  html.notch-left{--in-l:env(safe-area-inset-left,0px);}
+  html.notch-right{--in-r:env(safe-area-inset-right,0px);}
   .bottomnav{
     top:calc(env(safe-area-inset-top,0px) + var(--top-h));right:auto;bottom:0;width:var(--rail);
-    padding:10px 0 calc(env(safe-area-inset-bottom,0px) + 10px) env(safe-area-inset-left,0px);
+    padding:10px 0 calc(env(safe-area-inset-bottom,0px) + 10px) var(--in-l);
     grid-template-columns:1fr !important;grid-auto-rows:min-content;align-content:start;gap:2px;
     border-top:none;border-right:1px solid var(--line);
   }
-  .bottomnav a{height:68px;margin:0 8px;border-radius:14px;}
+  .bottomnav a{height:64px;margin:0 6px;border-radius:14px;font-size:.64rem;}
   .bottomnav a[aria-current="page"]{background:var(--cream);}
   main#view{width:auto;max-width:none;margin:0 0 0 var(--rail);
-    padding:0 calc(env(safe-area-inset-right,0px) + 24px) calc(env(safe-area-inset-bottom,0px) + 32px) 24px;}
+    padding:0 calc(var(--in-r) + 24px) calc(env(safe-area-inset-bottom,0px) + 32px) 24px;}
   /* lesbare Breite, mittig im freien Raum (!important schlägt Inline-Abstände wie margin:6px 0) */
   main#view:not(.full) > *{max-width:840px;margin-left:auto !important;margin-right:auto !important;}
   main#view.full{padding:0;}
@@ -437,20 +442,22 @@ details.more[open] summary::before{content:"–";}
   .sheet{left:var(--rail);max-width:640px;}
   .toast{left:calc(var(--rail) + 16px);}
   .tut-card{left:calc(var(--rail) + 12px);}
+  /* Knöpfe und Wind oben rechts nicht unter die Kamera schieben */
+  .map-full-btn,.map-wind{right:calc(var(--in-r) + 12px);}
 }
 /* Handy quer: niedrige Kopfzeile, schmalere Leiste — mehr Platz für Karte und Formular */
 @media (orientation: landscape) and (max-height: 540px){
-  :root{--top-h:46px;--rail-w:72px;}
-  .topbar{padding-top:calc(env(safe-area-inset-top,0px) + 6px);padding-bottom:6px;padding-left:calc(env(safe-area-inset-left,0px) + 16px);}
+  :root{--top-h:46px;--rail-w:60px;}
+  .topbar{padding-top:calc(env(safe-area-inset-top,0px) + 6px);padding-bottom:6px;padding-left:calc(var(--in-l) + 16px);padding-right:calc(var(--in-r) + 16px);}
   .topbar .brand span{display:none;}
   .bottomnav{padding-top:4px;}
-  .bottomnav a{height:52px;margin:0 6px;font-size:.62rem;gap:1px;}
-  .bottomnav a svg{width:22px;height:22px;}
+  .bottomnav a{height:50px;margin:0 4px;font-size:.58rem;gap:1px;}
+  .bottomnav a svg{width:21px;height:21px;}
   .sheet{max-height:94vh;}
 }
 /* Große Bildschirme: etwas breitere Leiste */
 @media (min-width: 1100px){
-  :root{--rail-w:96px;}
+  :root{--rail-w:84px;}
 }
 
 /* ---------------- Kontakt & Gästeansicht ---------------- */

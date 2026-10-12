@@ -368,6 +368,15 @@ var App = (function () {
     // iPhone/iPad erkennen (für die Seitenlänge, styles.css „html.ios") — andere Geräte bleiben unberührt
     var ua = navigator.userAgent || '';
     if (/iPhone|iPad|iPod/i.test(ua) || (/Macintosh/.test(ua) && navigator.maxTouchPoints > 1)) document.documentElement.classList.add('ios');
+    // Handy quer: auf welcher Seite liegt die Kamera? (90° = links, 270°/-90° = rechts) — styles.css hält nur dort Abstand
+    var notch = function () {
+      var w = (screen.orientation && typeof screen.orientation.angle === 'number') ? screen.orientation.angle : (window.orientation || 0);
+      document.documentElement.classList.toggle('notch-left', w === 90);
+      document.documentElement.classList.toggle('notch-right', w === 270 || w === -90);
+    };
+    notch();
+    if (screen.orientation && screen.orientation.addEventListener) screen.orientation.addEventListener('change', notch);
+    window.addEventListener('orientationchange', notch);
     await handleStartLink();
     I18n.apply(document);
     injectIcons(document.getElementById('setup'));
