@@ -99,9 +99,9 @@ var Karta = (function () {
   }
 
   /**
-   * Wind oben rechts als kleiner Kompass: Pfeil zeigt, wohin der Wind zieht (Ende = woher er kommt). Ist die Blickrichtung
-   * bekannt (nach „Mein Standort“), dreht sich die Windrose mit dem Handy — der Pfeil zeigt dann den Wind relativ zur
-   * Blickrichtung (oben = geradeaus), „N“ zeigt nach Norden.
+   * Wind oben rechts als runde Scheibe: in der Mitte die Stärke, am Rand eine Marke an der Seite, aus der der Wind kommt
+   * (Fahne zeigt zur Mitte, wie der Wind weht). Kupferpunkt = Norden. Ist die Blickrichtung bekannt (nach „Mein Standort“),
+   * dreht sich die Scheibe mit dem Handy: Marke oben = Wind von vorn, unten = von hinten.
    */
   function drawWind() {
     var box = document.getElementById('map-wind');
@@ -109,23 +109,22 @@ var Karta = (function () {
     if (!box) return;
     if (!c || c.wind_direction_10m == null) { box.hidden = true; return; }
     box.hidden = false;
-    box.setAttribute('aria-label', t('windFrom', { d: Wetter.dirName(c.wind_direction_10m, I18n.lang()) }));
-    // Zifferblatt: Striche alle 30°, Kupfer-Dreieck = Norden, schlanke Nadel = Wind (Spitze zeigt, wohin er zieht)
+    box.setAttribute('aria-label', t('windFrom', { d: Wetter.dirName(c.wind_direction_10m, I18n.lang()) }) + ', ' + Math.round(c.wind_speed_10m) + ' km/h');
     var striche = '';
-    for (var d = 0; d < 360; d += 30) striche += '<path d="M24 ' + (d % 90 ? '3.6v2' : '3v3.4') + '" transform="rotate(' + d + ' 24 24)" class="' + (d % 90 ? 'wc-t' : 'wc-T') + '"/>';
-    box.innerHTML = '<svg class="wind-compass" viewBox="0 0 48 48" aria-hidden="true"><circle cx="24" cy="24" r="22.5" class="wc-ring"/>' +
-      '<g class="wc-rose">' + striche + '<path d="M24 1.2l2.4 4.2h-4.8z" class="wc-n"/></g>' +
-      '<g class="wc-arrow"><circle cx="24" cy="11.5" r="1.6"/><path d="M24 13v19" class="wc-shaft"/><path d="M24 37.5l-3.4-6.6h6.8z"/></g></svg>' +
-      '<span class="wc-label"><b>' + esc(Wetter.dirName(c.wind_direction_10m, I18n.lang())) + '</b> <span class="num">' + Math.round(c.wind_speed_10m) + '</span><small> km/h</small></span>';
+    for (var d = 0; d < 360; d += 45) striche += '<path d="M28 ' + (d % 90 ? '3.4v2.2' : '3v3.2') + '" transform="rotate(' + d + ' 28 28)"/>';
+    box.innerHTML = '<svg class="wind-compass" viewBox="0 0 56 56" aria-hidden="true"><circle cx="28" cy="28" r="26" class="wc-ring"/>' +
+      '<g class="wc-rose"><g class="wc-ticks">' + striche + '</g><circle cx="28" cy="1.9" r="1.9" class="wc-n"/></g>' +
+      '<g class="wc-from"><path d="M26.9 12.5L28 17.5l1.1-5z" class="wc-streak"/><path d="M28 13.2L22.6 4.6Q28 7 33.4 4.6z" class="wc-flag"/></g>' +
+      '<text x="28" y="31.5" class="wc-v">' + Math.round(c.wind_speed_10m) + '</text><text x="28" y="40" class="wc-u">km/h</text></svg>';
     updateCompass();
   }
   function updateCompass() {
     var box = document.getElementById('map-wind'), c = Wetter.current();
     if (!box || !c || c.wind_direction_10m == null) return;
     var h = heading == null ? 0 : heading;
-    var rose = box.querySelector('.wc-rose'), arr = box.querySelector('.wc-arrow');
-    if (rose) rose.setAttribute('transform', 'rotate(' + (-h).toFixed(1) + ' 24 24)');
-    if (arr) arr.setAttribute('transform', 'rotate(' + (c.wind_direction_10m - h).toFixed(1) + ' 24 24)');
+    var rose = box.querySelector('.wc-rose'), from = box.querySelector('.wc-from');
+    if (rose) rose.setAttribute('transform', 'rotate(' + (-h).toFixed(1) + ' 28 28)');
+    if (from) from.setAttribute('transform', 'rotate(' + (c.wind_direction_10m - h).toFixed(1) + ' 28 28)');
     box.classList.toggle('turning', heading != null);
   }
 

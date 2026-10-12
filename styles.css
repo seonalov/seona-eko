@@ -495,13 +495,10 @@ ol.safety li{margin:0 0 6px;}
 
 /* ---------------- Karte im Vollbild ---------------- */
 .map-full-btn{position:absolute;right:12px;top:12px;z-index:520;width:44px;height:44px;}
-.map-wind{position:absolute;right:12px;top:66px;z-index:520;display:flex;flex-direction:column;align-items:center;gap:3px;padding:5px 5px 4px;border-radius:16px;
-  background:color-mix(in srgb,var(--paper) 82%,transparent);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);color:var(--ink);text-decoration:none;
-  box-shadow:0 1px 4px rgba(0,0,0,.18);font-size:.7rem;line-height:1;}
+.map-wind{position:absolute;right:12px;top:66px;z-index:520;display:block;width:56px;height:56px;border-radius:50%;
+  background:color-mix(in srgb,var(--paper) 80%,transparent);-webkit-backdrop-filter:blur(10px) saturate(1.2);backdrop-filter:blur(10px) saturate(1.2);
+  box-shadow:0 1px 2px rgba(0,0,0,.12),0 4px 14px rgba(0,0,0,.14);color:var(--ink);text-decoration:none;}
 .map-wind[hidden]{display:none;}
-.map-wind .wc-label{white-space:nowrap;letter-spacing:.01em;}
-.map-wind .wc-label b{font-weight:700;}
-.map-wind small{color:var(--ink-soft);font-size:.62rem;}
 body.map-full .map-wind{top:calc(env(safe-area-inset-top,0px) + 66px);}
 .map-full-btn svg{width:22px;height:22px;}
 .map-top{right:64px;}
@@ -595,15 +592,16 @@ body.picker-open{overflow:hidden;}
 .me-wrap .me-dot{position:absolute;left:27px;top:27px;}
 .me-cone{position:absolute;inset:0;border-radius:50%;background:conic-gradient(from -32deg,rgba(47,111,192,.55) 0deg 64deg,transparent 64deg);
   -webkit-mask:radial-gradient(circle,#000 18%,rgba(0,0,0,.6) 45%,transparent 70%);mask:radial-gradient(circle,#000 18%,rgba(0,0,0,.6) 45%,transparent 70%);}
-/* Wind-Kompass oben rechts: schlankes Zifferblatt auf Milchglas, Wert darunter */
-.wind-compass{width:46px;height:46px;flex:none;display:block;}
-.wind-compass .wc-ring{fill:none;stroke:color-mix(in srgb,var(--ink) 18%,transparent);stroke-width:1;}
-.wind-compass .wc-t{stroke:color-mix(in srgb,var(--ink) 35%,transparent);stroke-width:1;}
-.wind-compass .wc-T{stroke:var(--ink-soft);stroke-width:1.4;}
+/* Wind oben rechts: runde Milchglas-Scheibe, Stärke in der Mitte, Marke „Wind kommt von“ am Rand */
+.wind-compass{width:56px;height:56px;display:block;overflow:visible;}
+.wind-compass .wc-ring{fill:none;stroke:color-mix(in srgb,var(--ink) 14%,transparent);stroke-width:.8;}
+.wind-compass .wc-ticks path{stroke:color-mix(in srgb,var(--ink) 30%,transparent);stroke-width:1;stroke-linecap:round;}
 .wind-compass .wc-n{fill:var(--copper);}
-.wind-compass .wc-arrow{fill:var(--ink);stroke:none;}
-.wind-compass .wc-shaft{fill:none;stroke:var(--ink);stroke-width:1.6;stroke-linecap:round;}
-.map-wind.turning .wc-ring{stroke:var(--copper);stroke-width:1.4;}
+.wind-compass .wc-flag{fill:var(--ink);}
+.wind-compass .wc-streak{fill:var(--ink);opacity:.35;}
+.wind-compass .wc-v{font-family:var(--font-display);font-size:15px;font-weight:500;fill:var(--ink);text-anchor:middle;letter-spacing:.02em;}
+.wind-compass .wc-u{font-family:var(--font-body);font-size:6.2px;font-weight:600;fill:var(--ink-soft);text-anchor:middle;letter-spacing:.06em;}
+.map-wind.turning .wc-ring{stroke:var(--copper);stroke-width:1.2;}
 
 
 /* SLE-Liste: Markennummer antippen = kopieren */
